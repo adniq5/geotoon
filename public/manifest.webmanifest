@@ -1,0 +1,10 @@
+{
+  "name": "GEOTOON — Mengenal Bumi dari Atas",
+  "short_name": "GEOTOON",
+  "description": "Media pembelajaran Geografi berbasis komik digital.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fffaf0",
+  "theme_color": "#10223d",
+  "lang": "id-ID"
+}
