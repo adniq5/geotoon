@@ -36,15 +36,15 @@ export const evaluations: Evaluation[] = [
     subject: "Peta",
 
     introImage:
-      "/images/episodes/episode-01/evaluation/evaluasi.png",
+      "/images/episodes/episode-01/Evaluation/evaluasi.png",
 
     answerImage:
-      "/images/episodes/episode-01/evaluation/jawaban.png",
+      "/images/episodes/episode-01/Evaluation/jawaban.png",
 
     questions: [
       {
         image:
-          "/images/episodes/episode-01/evaluation/soal-01.png",
+          "/images/episodes/episode-01/Evaluation/soal-01.png",
 
         question:
           "Pernyataan yang paling tepat mengenai peta adalah ....",
@@ -64,7 +64,7 @@ export const evaluations: Evaluation[] = [
 
       {
         image:
-          "/images/episodes/episode-01/evaluation/soal-02.png",
+          "/images/episodes/episode-01/Evaluation/soal-02.png",
 
         question:
           "Mengapa peta menggunakan simbol dan warna yang berbeda-beda?",
@@ -84,7 +84,7 @@ export const evaluations: Evaluation[] = [
 
       {
         image:
-          "/images/episodes/episode-01/evaluation/soal-03.png",
+          "/images/episodes/episode-01/Evaluation/soal-03.png",
 
         question:
           "Salah satu fungsi peta adalah ....",
@@ -113,15 +113,15 @@ export const evaluations: Evaluation[] = [
     subject: "Penginderaan Jauh",
 
     introImage:
-      "/images/episodes/episode-02/evaluation/evaluasi.png",
+      "/images/episodes/episode-02/Evaluation/evaluasi.png",
 
     answerImage:
-      "/images/episodes/episode-02/evaluation/jawaban.png",
+      "/images/episodes/episode-02/Evaluation/jawaban.png",
 
     questions: [
       {
         image:
-          "/images/episodes/episode-02/evaluation/soal-01.png",
+          "/images/episodes/episode-02/Evaluation/soal-01.png",
 
         question:
           "Penginderaan jauh adalah teknik untuk memperoleh informasi mengenai objek atau wilayah di permukaan bumi dengan cara ....",
@@ -141,7 +141,7 @@ export const evaluations: Evaluation[] = [
 
       {
         image:
-          "/images/episodes/episode-02/evaluation/soal-02.png",
+          "/images/episodes/episode-02/Evaluation/soal-02.png",
 
         question:
           "Penginderaan jauh pasif menggunakan sumber energi ....",
@@ -161,7 +161,7 @@ export const evaluations: Evaluation[] = [
 
       {
         image:
-          "/images/episodes/episode-02/evaluation/soal-03.png",
+          "/images/episodes/episode-02/Evaluation/soal-03.png",
 
         question:
           "Hasil gambaran yang direkam menggunakan kamera atau sensor disebut ....",
@@ -190,15 +190,15 @@ export const evaluations: Evaluation[] = [
     subject: "Citra",
 
     introImage:
-      "/images/episodes/episode-03/evaluation/evaluasi.png",
+      "/images/episodes/episode-03/Evaluation/evaluasi.png",
 
     answerImage:
-      "/images/episodes/episode-03/evaluation/jawaban.png",
+      "/images/episodes/episode-03/Evaluation/jawaban.png",
 
     questions: [
       {
         image:
-          "/images/episodes/episode-03/evaluation/soal-01.png",
+          "/images/episodes/episode-03/Evaluation/soal-01.png",
 
         question:
           "Apa yang dimaksud dengan citra foto?",
@@ -218,7 +218,7 @@ export const evaluations: Evaluation[] = [
 
       {
         image:
-          "/images/episodes/episode-03/evaluation/soal-02.png",
+          "/images/episodes/episode-03/Evaluation/soal-02.png",
 
         question:
           "Berdasarkan arah sumbu kamera, citra foto dibedakan menjadi ....",
@@ -238,7 +238,7 @@ export const evaluations: Evaluation[] = [
 
       {
         image:
-          "/images/episodes/episode-03/evaluation/soal-03.png",
+          "/images/episodes/episode-03/Evaluation/soal-03.png",
 
         question:
           "Manakah yang termasuk contoh citra nonfoto?",
@@ -267,15 +267,15 @@ export const evaluations: Evaluation[] = [
     subject: "Interpretasi Citra",
 
     introImage:
-      "/images/episodes/episode-04/evaluation/evaluasi.png",
+      "/images/episodes/episode-04/Evaluation/evaluasi.png",
 
     answerImage:
-      "/images/episodes/episode-04/evaluation/jawaban.png",
+      "/images/episodes/episode-04/Evaluation/jawaban.png",
 
     questions: [
       {
         image:
-          "/images/episodes/episode-04/evaluation/soal-01.png",
+          "/images/episodes/episode-04/Evaluation/soal-01.png",
 
         question:
           "Kegiatan mengkaji citra untuk mengenali objek dan memperoleh informasi dari objek tersebut disebut ....",
@@ -295,7 +295,7 @@ export const evaluations: Evaluation[] = [
 
       {
         image:
-          "/images/episodes/episode-04/evaluation/soal-02.png",
+          "/images/episodes/episode-04/Evaluation/soal-02.png",
 
         question:
           "Dalam interpretasi citra, setelah menemukan keberadaan suatu objek, langkah selanjutnya adalah mengenali objek tersebut berdasarkan ciri-cirinya. Tahapan tersebut disebut ....",
@@ -315,7 +315,7 @@ export const evaluations: Evaluation[] = [
 
       {
         image:
-          "/images/episodes/episode-04/evaluation/soal-03.png",
+          "/images/episodes/episode-04/Evaluation/soal-03.png",
 
         question:
           "Ketika sulit mengenali suatu objek pada citra, kita dapat menggunakan petunjuk seperti warna, bentuk, ukuran, tekstur, pola, dan bayangan. Petunjuk tersebut disebut ....",
@@ -344,15 +344,15 @@ export const evaluations: Evaluation[] = [
     subject: "Unsur Interpretasi Citra",
 
     introImage:
-      "/images/episodes/episode-05/evaluation/evaluasi.png",
+      "/images/episodes/episode-05/Evaluation/evaluasi.png",
 
     answerImage:
-      "/images/episodes/episode-05/evaluation/jawaban.png",
+      "/images/episodes/episode-05/Evaluation/jawaban.png",
 
     questions: [
       {
         image:
-          "/images/episodes/episode-05/evaluation/soal-01.png",
+          "/images/episodes/episode-05/Evaluation/soal-01.png",
 
         question:
           "Dalam mengenali objek pada citra, kita dapat memperhatikan tingkat terang atau gelap serta warna yang terlihat. Unsur interpretasi citra tersebut adalah ....",
@@ -372,7 +372,7 @@ export const evaluations: Evaluation[] = [
 
       {
         image:
-          "/images/episodes/episode-05/evaluation/soal-02.png",
+          "/images/episodes/episode-05/Evaluation/soal-02.png",
 
         question:
           "Pada citra terlihat sebuah kawasan permukiman dengan rumah-rumah yang tersusun teratur. Untuk mengenali objek tersebut, kita dapat memperhatikan ....",
@@ -392,7 +392,7 @@ export const evaluations: Evaluation[] = [
 
       {
         image:
-          "/images/episodes/episode-05/evaluation/soal-03.png",
+          "/images/episodes/episode-05/Evaluation/soal-03.png",
 
         question:
           "Saat mengidentifikasi suatu objek pada citra, kita dapat menggunakan berbagai petunjuk, seperti rona, warna, bentuk, ukuran, tekstur, pola, bayangan, situs, dan asosiasi. Tujuan penggunaan petunjuk tersebut adalah ....",
