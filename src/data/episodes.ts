@@ -2,6 +2,7 @@ export type Scene = {
   id: string;
   title: string;
   image: string;
+  voice?: string;
 };
 
 export type Episode = {
@@ -21,8 +22,10 @@ export const episodes: Episode[] = [
     title: "Petunjuk Pertama: Membaca Bumi Lewat Peta",
     description:
       "Sebuah perjalanan untuk memahami bumi dimulai dari sebuah peta.",
+
     cover:
       "/images/episodes/episode-01/Cover/Tampilan%20Awal%20Eps%201.png",
+
     preview:
       "/images/episodes/episode-01/Preview/Episod%201.png",
 
@@ -30,8 +33,8 @@ export const episodes: Episode[] = [
       {
         id: "scene-01",
         title: "Sebuah Tantangan",
-        image:
-          "/images/episodes/episode-01/Scene%201/Scene%201.png",
+        image: "/images/episodes/episode-01/Scene%201/Scene%201.png",
+        voice: "/audio/episode-01/scene-01.mp3",
       },
       {
         id: "scene-02",
@@ -116,8 +119,9 @@ export const episodes: Episode[] = [
   {
     id: "episode-03",
     number: 3,
-    title: "Episode 3",
-    description: "Lanjutan petualangan GEOTOON.",
+    title: "Citra, Mata Bumi dari Atas",
+    description:
+      "Mengenal citra sebagai gambaran permukaan bumi dan berbagai jenis citra.",
 
     cover:
       "/images/episodes/episode-03/Cover/Judul%20Awal%20Episod%203.png",
@@ -174,8 +178,9 @@ export const episodes: Episode[] = [
   {
     id: "episode-04",
     number: 4,
-    title: "Episode 4",
-    description: "Lanjutan petualangan GEOTOON.",
+    title: "Menjadi Detektif Citra",
+    description:
+      "Mempelajari cara mengenali dan memahami objek melalui interpretasi citra.",
 
     cover:
       "/images/episodes/episode-04/Cover/Tampilan%20Awal%20Eps%204.png",
@@ -220,8 +225,9 @@ export const episodes: Episode[] = [
   {
     id: "episode-05",
     number: 5,
-    title: "Episode 5",
-    description: "Petualangan GEOTOON berlanjut.",
+    title: "Memahami Kunci Membaca Citra",
+    description:
+      "Mengenal berbagai unsur interpretasi citra untuk membantu mengenali objek.",
 
     cover:
       "/images/episodes/episode-05/Cover/Judul%20Tampilan%20Eps%205.png",
