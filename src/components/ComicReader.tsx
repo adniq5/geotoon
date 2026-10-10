@@ -243,21 +243,29 @@ export default function ComicReader({
    */
 
   const toggleMusic = async () => {
-    if (!musicRef.current) return;
+  const audio = musicRef.current;
 
-    if (isMusicPlaying) {
-      musicRef.current.pause();
-      setIsMusicPlaying(false);
-      return;
-    }
+  if (!audio) {
+    console.error("BGM belum tersedia: musicRef kosong.");
+    return;
+  }
 
-    try {
-      await musicRef.current.play();
-      setIsMusicPlaying(true);
-    } catch {
-      setIsMusicPlaying(false);
-    }
-  };
+  if (isMusicPlaying) {
+    audio.pause();
+    setIsMusicPlaying(false);
+    return;
+  }
+
+  try {
+    audio.volume = 0.18;
+    await audio.play();
+    setIsMusicPlaying(true);
+    console.log("BGM berhasil diputar:", audio.currentSrc);
+  } catch (error) {
+    setIsMusicPlaying(false);
+    console.error("BGM gagal diputar:", error);
+  }
+};
 
   /*
    * =========================
