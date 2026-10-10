@@ -1,9 +1,17 @@
+export type SceneContent =
+  | { type: "image"; image: string }
+  | { type: "html"; html: string }
+  | { type: "video"; video: string }
+  | {
+      type: "game";
+      game: "misi-tarik-garis" | "misi-detektif-citra";
+    };
+
 export type Scene = {
   id: string;
   title: string;
-  image: string;
   voice?: string;
-};
+} & SceneContent;
 
 export type Episode = {
   id: string;
@@ -11,7 +19,8 @@ export type Episode = {
   title: string;
   description: string;
   cover: string;
-  preview: string;
+  coverHtml?: string;
+  preview?: string;
   scenes: Scene[];
 };
 
@@ -22,285 +31,151 @@ export const episodes: Episode[] = [
     title: "Petunjuk Pertama: Membaca Bumi Lewat Peta",
     description:
       "Sebuah perjalanan untuk memahami bumi dimulai dari sebuah peta.",
-
-    cover:
-      "/images/episodes/episode-01/Cover/Tampilan%20Awal%20Eps%201.png",
-
-    preview:
-      "/images/episodes/episode-01/Preview/Episod%201.png",
-
+    cover: "/images/episodes/episode-01/Cover/Tampilan%20Awal%20Eps%201.png",
+    coverHtml: "/animations/episode-01/cover.html",
+    preview: "/images/episodes/episode-01/Preview/Episod%201.png",
     scenes: [
       {
         id: "scene-01",
         title: "Sebuah Tantangan",
-        image: "/images/episodes/episode-01/Scene%201/Scene%201.png",
-        voice: "/audio/episode-01/scene-01.mp3",
+        type: "html",
+        html: "/animations/episode-01/scene-01.html",
+        voice: "/audio/voice-over/episode-1/scene1-episode1.mp3",
       },
       {
         id: "scene-02",
         title: "Apa Itu Peta?",
-        image:
-          "/images/episodes/episode-01/Scene%202/Scene%202.png",
+        type: "html",
+        html: "/animations/episode-01/scene-02.html",
+        voice: "/audio/voice-over/episode-1/scene2-episode1.mp3",
       },
       {
         id: "scene-03",
         title: "Mengenal Isi Peta",
-        image:
-          "/images/episodes/episode-01/Scene%203/Scene%203.png",
+        type: "html",
+        html: "/animations/episode-01/scene-03.html",
+        voice: "/audio/voice-over/episode-1/scene3-episode1.mp3",
       },
       {
         id: "scene-04",
         title: "Peta dalam Kehidupan",
-        image:
-          "/images/episodes/episode-01/Scene%204/Scene%204.png",
+        type: "html",
+        html: "/animations/episode-01/scene-04.html",
+        voice: "/audio/voice-over/episode-1/scene4-episode1.mp3",
       },
       {
         id: "scene-05",
         title: "Misteri Baru",
-        image:
-          "/images/episodes/episode-01/Scene%205/Scene%205.png",
+        type: "html",
+        html: "/animations/episode-01/scene-05.html",
+        voice: "/audio/voice-over/episode-1/scene5-episode1.mp3",
       },
     ],
   },
-
   {
     id: "episode-02",
     number: 2,
     title: "Melihat Bumi Tanpa Menyentuhnya",
     description:
-      "Petualangan berlanjut dengan mengenal cara mengamati bumi dari jarak jauh.",
-
-    cover:
-      "/images/episodes/episode-02/Cover/Scene%20Tampilan%20Awal%20Eps%202.png",
-
-    preview:
-      "/images/episodes/episode-02/Preview/Episod%202.png",
-
+      "Petualangan berlanjut dengan mengenal penginderaan jauh dan cara mengamati bumi dari jarak jauh.",
+    cover: "/images/episodes/episode-02/Cover/Scene%20Tampilan%20Awal%20Eps%202.png",
+    coverHtml: "/animations/episode-02/cover.html",
+    preview: "/images/episodes/episode-02/Preview/Episod%202.png",
     scenes: [
       {
         id: "scene-01",
-        title: "Scene 1",
-        image:
-          "/images/episodes/episode-02/Scene%201/Scene%201.png",
+        title: "Petualangan Dimulai",
+        type: "html",
+        html: "/animations/episode-02/scene-01.html",
       },
       {
         id: "scene-02",
-        title: "Scene 2",
-        image:
-          "/images/episodes/episode-02/Scene%202/Scene%202.png",
+        title: "Penginderaan Jauh",
+        type: "html",
+        html: "/animations/episode-02/scene-02.html",
       },
       {
         id: "scene-03",
-        title: "Scene 3",
-        image:
-          "/images/episodes/episode-02/Scene%203/Scene%203.png",
+        title: "Bagaimana Satelit Mengamati Bumi",
+        type: "html",
+        html: "/animations/episode-02/scene-03.html",
       },
       {
         id: "scene-04",
-        title: "Scene 4",
-        image:
-          "/images/episodes/episode-02/Scene%204/Scene%204.png",
+        title: "Citra, Mata Bumi dari Atas",
+        type: "html",
+        html: "/animations/episode-02/scene-04.html",
       },
       {
         id: "scene-05",
-        title: "Scene 5",
-        image:
-          "/images/episodes/episode-02/Scene%205/Scene%205.png",
+        title: "Mengenal Jenis-Jenis Citra",
+        type: "html",
+        html: "/animations/episode-02/scene-05.html",
       },
       {
         id: "scene-06",
-        title: "Scene 6",
-        image:
-          "/images/episodes/episode-02/Scene%206/Scene%206.png",
-      },
-    ],
-  },
-
-  {
-    id: "episode-03",
-    number: 3,
-    title: "Citra, Mata Bumi dari Atas",
-    description:
-      "Mengenal citra sebagai gambaran permukaan bumi dan berbagai jenis citra.",
-
-    cover:
-      "/images/episodes/episode-03/Cover/Judul%20Awal%20Episod%203.png",
-
-    preview:
-      "/images/episodes/episode-03/Preview/Episod%203.png",
-
-    scenes: [
-      {
-        id: "scene-01",
-        title: "Scene 1",
-        image:
-          "/images/episodes/episode-03/Scene%201/Scene%201.png",
-      },
-      {
-        id: "scene-02",
-        title: "Scene 2",
-        image:
-          "/images/episodes/episode-03/Scene%202/Scene%202.png",
-      },
-      {
-        id: "scene-03",
-        title: "Scene 3",
-        image:
-          "/images/episodes/episode-03/Scene%203/Scene%203.png",
-      },
-      {
-        id: "scene-04",
-        title: "Scene 4",
-        image:
-          "/images/episodes/episode-03/Scene%204/Scene%204.png",
-      },
-      {
-        id: "scene-05",
-        title: "Scene 5",
-        image:
-          "/images/episodes/episode-03/Scene%205/Scene%205.png",
-      },
-      {
-        id: "scene-06",
-        title: "Scene 6",
-        image:
-          "/images/episodes/episode-03/Scene%206/Scene%206.png",
+        title: "Misi Detektif Citra",
+        type: "html",
+        html: "/animations/episode-02/scene-06.html",
       },
       {
         id: "scene-07",
-        title: "Scene 7",
-        image:
-          "/images/episodes/episode-03/Scene%207/Scene%207.png",
-      },
-    ],
-  },
-
-  {
-    id: "episode-04",
-    number: 4,
-    title: "Menjadi Detektif Citra",
-    description:
-      "Mempelajari cara mengenali dan memahami objek melalui interpretasi citra.",
-
-    cover:
-      "/images/episodes/episode-04/Cover/Tampilan%20Awal%20Eps%204.png",
-
-    preview:
-      "/images/episodes/episode-04/Preview/Episod%204.png",
-
-    scenes: [
-      {
-        id: "scene-01",
-        title: "Scene 1",
-        image:
-          "/images/episodes/episode-04/Scene%201/Scene%201.png",
-      },
-      {
-        id: "scene-02",
-        title: "Scene 2",
-        image:
-          "/images/episodes/episode-04/Scene%202/Scene%202.png",
-      },
-      {
-        id: "scene-03",
-        title: "Scene 3",
-        image:
-          "/images/episodes/episode-04/Scene%203/Scene%203.png",
-      },
-      {
-        id: "scene-04",
-        title: "Scene 4",
-        image:
-          "/images/episodes/episode-04/Scene%204/Scene%204.png",
-      },
-      {
-        id: "scene-05",
-        title: "Scene 5",
-        image:
-          "/images/episodes/episode-04/Scene%205/Scene%205.png",
-      },
-    ],
-  },
-
-  {
-    id: "episode-05",
-    number: 5,
-    title: "Memahami Kunci Membaca Citra",
-    description:
-      "Mengenal berbagai unsur interpretasi citra untuk membantu mengenali objek.",
-
-    cover:
-      "/images/episodes/episode-05/Cover/Judul%20Tampilan%20Eps%205.png",
-
-    preview:
-      "/images/episodes/episode-05/Preview/Episod%205.png",
-
-    scenes: [
-      {
-        id: "scene-01",
-        title: "Scene 1",
-        image:
-          "/images/episodes/episode-05/Scene%201/Scene%201.png",
-      },
-      {
-        id: "scene-02",
-        title: "Scene 2",
-        image:
-          "/images/episodes/episode-05/Scene%202/Scene%202.png",
-      },
-      {
-        id: "scene-03",
-        title: "Scene 3",
-        image:
-          "/images/episodes/episode-05/Scene%203/Scene%203.png",
-      },
-      {
-        id: "scene-04",
-        title: "Scene 4",
-        image:
-          "/images/episodes/episode-05/Scene%204/Scene%204.png",
-      },
-      {
-        id: "scene-05",
-        title: "Scene 5",
-        image:
-          "/images/episodes/episode-05/Scene%205/Scene%205.png",
-      },
-      {
-        id: "scene-06",
-        title: "Scene 6",
-        image:
-          "/images/episodes/episode-05/Scene%206/Scene%206.png",
-      },
-      {
-        id: "scene-07",
-        title: "Scene 7",
-        image:
-          "/images/episodes/episode-05/Scene%207/Scene%207.png",
+        title: "Tiga Tahap Interpretasi Citra",
+        type: "html",
+        html: "/animations/episode-02/scene-07.html",
       },
       {
         id: "scene-08",
-        title: "Scene 8",
-        image:
-          "/images/episodes/episode-05/Scene%208/Scene%208.png",
+        title: "Rona, Warna, dan Bentuk",
+        type: "html",
+        html: "/animations/episode-02/scene-08.html",
       },
       {
         id: "scene-09",
         title: "Scene 9",
-        image:
-          "/images/episodes/episode-05/Scene%209/Scene%209.png",
+        type: "html",
+        html: "/animations/episode-02/scene-09.html",
       },
       {
         id: "scene-10",
         title: "Scene 10",
-        image:
-          "/images/episodes/episode-05/Scene%2010/Scene%2010.png",
+        type: "html",
+        html: "/animations/episode-02/scene-10.html",
       },
       {
         id: "scene-11",
         title: "Scene 11",
-        image:
-          "/images/episodes/episode-05/Scene%2011/Scene%2011.png",
+        type: "html",
+        html: "/animations/episode-02/scene-11.html",
+      },
+      {
+        id: "scene-12",
+        title: "Scene 12",
+        type: "html",
+        html: "/animations/episode-02/scene-12.html",
+      },
+    ],
+  },
+  {
+    id: "episode-03",
+    number: 3,
+    title: "Penalaran Analisis Penginderaan Jauh dan Citra",
+    description:
+      "Amati citra, susun interpretasi dari bukti, dan jelaskan penalaranmu dalam Misi Detektif Citra.",
+    cover: "/images/episodes/episode-03/Cover/Judul%20Awal%20Episod%203.png",
+    coverHtml: "/animations/episode-03/cover.html",
+    scenes: [
+      {
+        id: "scene-01",
+        title: "Misi Tarik Garis: Cara Kerja Citra Penginderaan Jauh",
+        type: "game",
+        game: "misi-tarik-garis",
+      },
+      {
+        id: "scene-02",
+        title: "Misi Detektif Citra",
+        type: "game",
+        game: "misi-detektif-citra",
       },
     ],
   },

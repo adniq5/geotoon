@@ -27,8 +27,9 @@ export default async function EpisodePage({
         title={episode.title}
         cover={episode.cover}
         preview={episode.preview}
+        coverHtml={episode.coverHtml}
         scenes={episode.scenes}
-        backgroundMusic="/audio/bgm/geotoon-backsound.mp3"
+        backgroundMusic="/audio/bgm/Stardew%20Valley%20OST%20-%20Summer%20(Nature's%20Crescendo).mp3"
       />
     </main>
   );

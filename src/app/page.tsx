@@ -1,14 +1,18 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import { episodes } from '@/data/episodes';
 import EpisodeCard from '@/components/EpisodeCard';
+import CharacterIntroductions from '@/components/CharacterIntroductions';
+import HomepageAnimation from '@/components/HomepageAnimation';
 
 export default function Home() {
   return (
     <main>
       {/* HERO */}
-      <section className="hero">
-        <div className="hero-copy">
+      <section
+        className="hero"
+        style={{ gridTemplateColumns: 'minmax(0, 1fr)' }}
+      >
+        <div className="hero-copy" style={{ maxWidth: '760px' }}>
           <span className="eyebrow">MEDIA PEMBELAJARAN GEOGRAFI</span>
 
           <h1>
@@ -33,15 +37,6 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="hero-art">
-          <Image
-            src="/images/geotoon-cover.jpg"
-            alt="Karakter GEOTOON"
-            width={1536}
-            height={1024}
-            priority
-          />
-        </div>
       </section>
 
       {/* KENALAN DENGAN TOKOH */}
@@ -57,89 +52,15 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="feature-grid">
-          <div className="feature">
-            👧
-            <strong>Marni</strong>
-            <span>
-              Teman yang aktif bertanya dan penasaran dengan berbagai hal.
-            </span>
-          </div>
-
-          <div className="feature">
-            👦
-            <strong>Muhammad Ramadhani</strong>
-            <span>
-              Teman yang senang menjelaskan dan berbagi pengetahuan.
-            </span>
-          </div>
-
-          <div className="feature">
-            👧
-            <strong>Gita Tria Ananda</strong>
-            <span>
-              Teman yang kritis dan suka mencari tahu lebih dalam.
-            </span>
-          </div>
-
-          <div className="feature">
-            👧
-            <strong>Humairoh</strong>
-            <span>
-              Teman yang ikut mengamati dan membantu memahami materi.
-            </span>
-          </div>
-        </div>
-
-        {/* AUDIO PERKENALAN */}
-        <div
-          style={{
-            marginTop: '28px',
-            padding: '24px',
-            borderRadius: '22px',
-            border: '2px solid rgba(15, 39, 71, 0.12)',
-            background: '#fff',
-            textAlign: 'center',
+        <CharacterIntroductions
+          banner={{
+            src: "/animations/characters/intro.html",
+            title: "Animasi perkenalan tokoh GEOTOON",
+            audioSrc: "/audio/introduction/perkenalan-geotoon.mp3",
+            audioLabel: "voice-over perkenalan GEOTOON",
+            aspectRatio: "1536 / 255",
           }}
-        >
-          <span className="eyebrow">🎙️ KENALAN DENGAN TOKOH GEOTOON</span>
-
-          <h3
-            style={{
-              margin: '8px 0',
-              fontSize: '1.4rem',
-            }}
-          >
-            Yuk, kenalan dulu!
-          </h3>
-
-          <p
-            style={{
-              margin: '0 auto 18px',
-              maxWidth: '600px',
-            }}
-          >
-            Dengarkan perkenalan para tokoh GEOTOON sebelum memulai
-            perjalanan belajar Geografi.
-          </p>
-
-          <audio
-            controls
-            preload="metadata"
-            style={{
-              width: '100%',
-              maxWidth: '560px',
-              margin: '0 auto',
-            }}
-          >
-            <source
-              src="/audio/introduction/perkenalan-geotoon.mp3"
-              type="audio/mpeg"
-            />
-
-            Browser kamu tidak mendukung pemutar audio.
-          </audio>
-        </div>
+        />
       </section>
 
       {/* TENTANG GEOTOON */}
@@ -150,15 +71,26 @@ export default function Home() {
           <h2>Belajar Geografi lewat cerita.</h2>
 
           <p>
-            Materi disampaikan melalui komik digital, audio, dan quiz
-            sederhana agar siswa dapat belajar dengan cara yang lebih
-            interaktif.
+          Materi disampaikan melalui komik digital, narasi audio, dan
+          musik latar agar siswa dapat belajar Geografi melalui cerita
+          yang menarik dan interaktif.
           </p>
         </div>
-
-        <div className="feature-grid">
+        <h3 style={{ margin: '0 0 16px', fontSize: '1.4rem' }}>
+          Penutup Bersama
+        </h3>
+        <div style={{ marginBottom: '28px' }}>
+          <HomepageAnimation
+            src="/animations/characters/closing.html"
+            title="Animasi Penutup Bersama GEOTOON"
+            audioSrc="/audio/introduction/penutup-perkenalan.mp3"
+            audioLabel="voice-over penutup GEOTOON"
+            aspectRatio="1536 / 189"
+          />
+        </div>
+        <div className="feature-grid homepage-feature-grid">
           <div className="feature">
-            📖
+            📚
             <strong>Komik Digital</strong>
             <span>
               Belajar melalui panel cerita dan karakter.
@@ -179,14 +111,17 @@ export default function Home() {
             <span>
               Nikmati suasana belajar yang lebih hidup dengan backsound.
             </span>
-          </div>
-
-          <div className="feature">
-            📝
-            <strong>Quiz</strong>
-            <span>
-              Uji pemahaman setelah menyelesaikan setiap episode.
-            </span>
+            <small className="music-credit">
+              Credit Music: &quot;Summer (Nature&apos;s Crescendo)&quot; by
+              ConcernedApe (Stardew Valley OST) - Source:{" "}
+              <a
+                href="https://youtu.be/k0nqXeM-sns"
+                target="_blank"
+                rel="noreferrer"
+              >
+                YouTube
+              </a>
+            </small>
           </div>
         </div>
       </section>

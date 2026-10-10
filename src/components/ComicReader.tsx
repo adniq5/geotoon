@@ -1,20 +1,18 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-
-type Scene = {
-  id: string;
-  title: string;
-  image: string;
-  voice?: string;
-};
+import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import MisiDetektifCitra from "@/components/MisiDetektifCitra";
+import MisiTarikGaris from "@/components/MisiTarikGaris";
+import type { Scene } from "@/data/episodes";
 
 type ComicReaderProps = {
   episodeId: string;
   episodeNumber: number;
   title: string;
   cover: string;
-  preview: string;
+  coverHtml?: string;
+  preview?: string;
   scenes: Scene[];
   backgroundMusic?: string;
 };
@@ -26,6 +24,7 @@ export default function ComicReader({
   episodeNumber,
   title,
   cover,
+  coverHtml,
   preview,
   scenes,
   backgroundMusic,
@@ -34,14 +33,102 @@ export default function ComicReader({
   const [current, setCurrent] = useState(0);
 
   const [isVoicePlaying, setIsVoicePlaying] = useState(false);
+  const [voiceFailed, setVoiceFailed] = useState(false);
+  const [voiceMessage, setVoiceMessage] = useState("");
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
 
   const voiceRef = useRef<HTMLAudioElement | null>(null);
   const musicRef = useRef<HTMLAudioElement | null>(null);
+  const voiceSessionRef = useRef(0);
 
   const touchStartX = useRef<number | null>(null);
 
   const scene = scenes[current];
+  const isEpisodeThreeCover = episodeId === "episode-03" && Boolean(coverHtml);
+  const nextEpisode =
+    episodeId === "episode-01"
+      ? { id: "episode-02", label: "Lanjut Episode 2" }
+      : episodeId === "episode-02"
+        ? { id: "episode-03", label: "Lanjut Episode 3" }
+        : null;
+
+  const stopCurrentVoice = useCallback(() => {
+    voiceSessionRef.current += 1;
+
+    const currentVoice = voiceRef.current;
+
+    if (!currentVoice) {
+      setIsVoicePlaying(false);
+      setVoiceFailed(false);
+      setVoiceMessage("");
+      return;
+    }
+
+    currentVoice.onended = null;
+    currentVoice.onerror = null;
+    currentVoice.pause();
+    currentVoice.currentTime = 0;
+    voiceRef.current = null;
+    setIsVoicePlaying(false);
+    setVoiceFailed(false);
+    setVoiceMessage("");
+  }, []);
+
+  const stopReaderAudio = useCallback(() => {
+    stopCurrentVoice();
+    if (musicRef.current) {
+      musicRef.current.pause();
+      musicRef.current.currentTime = 0;
+    }
+    setIsMusicPlaying(false);
+  }, [stopCurrentVoice]);
+
+  const playVoice = useCallback(
+    (voicePath: string) => {
+      stopCurrentVoice();
+
+      const session = voiceSessionRef.current;
+      const voice = new Audio(voicePath);
+      const sceneLabel = `Scene ${current + 1}`;
+
+      voice.volume = 1;
+      voiceRef.current = voice;
+      setVoiceFailed(false);
+      setVoiceMessage(`Memutar voice-over ${sceneLabel.toLowerCase()}...`);
+      setIsVoicePlaying(true);
+
+      voice.onended = () => {
+        if (voiceSessionRef.current !== session) return;
+
+        voiceRef.current = null;
+        setIsVoicePlaying(false);
+        setVoiceMessage(`Voice-over ${sceneLabel} selesai.`);
+      };
+
+      voice.onerror = () => {
+        if (voiceSessionRef.current !== session) return;
+
+        voiceRef.current = null;
+        setIsVoicePlaying(false);
+        setVoiceFailed(true);
+        setVoiceMessage(
+          `Voice-over ${sceneLabel} gagal dimuat. Silakan periksa koneksi lalu buka ulang scene ini.`
+        );
+      };
+
+      voice.play().catch(() => {
+        if (voiceSessionRef.current !== session) return;
+
+        voiceRef.current = null;
+        setIsVoicePlaying(false);
+        setVoiceFailed(true);
+        setVoiceMessage(
+          `Voice-over ${sceneLabel} tidak dapat diputar. Silakan coba lagi.`
+        );
+      });
+    },
+    [current, stopCurrentVoice]
+  );
 
   /*
    * =========================
@@ -73,36 +160,31 @@ export default function ComicReader({
    */
 
   useEffect(() => {
-    if (stage !== "scene") return;
-
-    if (!scene?.voice) {
-      setIsVoicePlaying(false);
+    if (stage !== "scene") {
+      stopCurrentVoice();
       return;
     }
 
-    voiceRef.current?.pause();
+    if (!scene?.voice) {
+      stopCurrentVoice();
+      return;
+    }
 
-    const voice = new Audio(scene.voice);
+    const voicePath = scene.voice;
+    let isActive = true;
 
-    voice.volume = 1;
+    const playTimer = window.setTimeout(() => {
+      if (!isActive) return;
 
-    voiceRef.current = voice;
-
-    setIsVoicePlaying(true);
-
-    voice.play().catch(() => {
-      setIsVoicePlaying(false);
-    });
-
-    voice.onended = () => {
-      setIsVoicePlaying(false);
-    };
+      playVoice(voicePath);
+    }, 0);
 
     return () => {
-      voice.pause();
-      voice.currentTime = 0;
+      isActive = false;
+      window.clearTimeout(playTimer);
+      stopCurrentVoice();
     };
-  }, [stage, current, scene?.voice]);
+  }, [stage, current, scene?.voice, playVoice, stopCurrentVoice]);
 
   /*
    * =========================
@@ -151,23 +233,7 @@ export default function ComicReader({
   const replayVoice = () => {
     if (!scene?.voice) return;
 
-    voiceRef.current?.pause();
-
-    const voice = new Audio(scene.voice);
-
-    voice.volume = 1;
-
-    voiceRef.current = voice;
-
-    setIsVoicePlaying(true);
-
-    voice.play().catch(() => {
-      setIsVoicePlaying(false);
-    });
-
-    voice.onended = () => {
-      setIsVoicePlaying(false);
-    };
+    playVoice(scene.voice);
   };
 
   /*
@@ -237,6 +303,13 @@ export default function ComicReader({
         <div className="reader">
 
           <div className="reader-header">
+            <Link
+              href="/episodes"
+              className="button secondary reader-back-link"
+              onClick={stopReaderAudio}
+            >
+              <span aria-hidden="true">←</span> Pilih Episode
+            </Link>
             <div className="eyebrow">
               GEOTOON • EPISODE {String(episodeNumber).padStart(2, "0")}
             </div>
@@ -244,39 +317,64 @@ export default function ComicReader({
             <h1>{title}</h1>
 
             <p>
-              Sebuah petualangan untuk mengenal Geografi
-              melalui komik interaktif.
+              Ikuti cerita dan aktivitas interaktif untuk belajar Geografi.
             </p>
           </div>
 
-          <div className="reader-frame">
-            <img
-              src={cover}
-              alt={`Cover GEOTOON Episode ${episodeNumber}`}
-              className="comic-image"
-              draggable={false}
-            />
+          <div
+            className={`reader-frame${coverHtml ? " reader-frame-animated" : ""}${
+              isEpisodeThreeCover ? " reader-frame-episode-03-cover" : ""
+            }`}
+          >
+            {coverHtml ? (
+              <iframe
+                src={coverHtml}
+                title={`Animasi sampul ${title}`}
+                className="animation-frame"
+                sandbox="allow-scripts"
+                allowFullScreen
+              />
+            ) : (
+              <img
+                src={cover}
+                alt={`Cover GEOTOON Episode ${episodeNumber}`}
+                className="comic-image"
+                draggable={false}
+              />
+            )}
+            {isEpisodeThreeCover && (
+              <div className="reader-cover-hit-area">
+                <button
+                  type="button"
+                  className="reader-cover-start-target"
+                  aria-label="Mulai Petualangan Episode 3"
+                  onClick={() => void startStory()}
+                />
+              </div>
+            )}
           </div>
 
-          <div className="reader-finish">
+          {!isEpisodeThreeCover && (
+            <div className="reader-finish">
+              <div>
+                <div className="result-icon">🌍</div>
+                <p>Siap mengikuti petualangan GEOTOON?</p>
+              </div>
 
-            <div>
-              <div className="result-icon">🌍</div>
-
-              <p>
-                Siap mengikuti petualangan
-                GEOTOON?
-              </p>
+              <button
+                className="button primary"
+                onClick={() => {
+                  if (preview) {
+                    setStage("preview");
+                  } else {
+                    void startStory();
+                  }
+                }}
+              >
+                {preview ? "👀 Lihat Preview" : "▶ Mulai Petualangan"}
+              </button>
             </div>
-
-            <button
-              className="button primary"
-              onClick={() => setStage("preview")}
-            >
-              👀 Lihat Preview
-            </button>
-
-          </div>
+          )}
 
         </div>
       </section>
@@ -289,12 +387,19 @@ export default function ComicReader({
    * =========================
    */
 
-  if (stage === "preview") {
+  if (stage === "preview" && preview) {
     return (
       <section className="reader-page page-shell">
         <div className="reader">
 
           <div className="reader-header">
+            <Link
+              href="/episodes"
+              className="button secondary reader-back-link"
+              onClick={stopReaderAudio}
+            >
+              <span aria-hidden="true">←</span> Pilih Episode
+            </Link>
 
             <div className="eyebrow">
               GEOTOON • PREVIEW EPISODE{" "}
@@ -352,6 +457,13 @@ export default function ComicReader({
     <section className="reader-page page-shell">
 
       <div className="reader-header">
+        <Link
+          href="/episodes"
+          className="button secondary reader-back-link"
+          onClick={stopReaderAudio}
+        >
+          <span aria-hidden="true">←</span> Pilih Episode
+        </Link>
 
         <div className="eyebrow">
           GEOTOON • EPISODE{" "}
@@ -361,8 +473,8 @@ export default function ComicReader({
         <h1>{title}</h1>
 
         <p>
-          Geser komik atau gunakan tombol
-          untuk melanjutkan petualangan.
+          Gunakan navigasi untuk melanjutkan petualangan. Beberapa scene juga
+          bisa diputar atau dimainkan langsung.
         </p>
 
       </div>
@@ -392,17 +504,52 @@ export default function ComicReader({
         {/* COMIC */}
 
         <div
-          className="reader-frame"
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
+          className={`reader-frame${scene.type === "html" ? " reader-frame-animated" : ""}${scene.type === "game" ? " reader-frame-game" : ""}`}
+          onTouchStart={
+            scene.type === "game" || scene.type === "video"
+              ? undefined
+              : handleTouchStart
+          }
+          onTouchEnd={
+            scene.type === "game" || scene.type === "video"
+              ? undefined
+              : handleTouchEnd
+          }
         >
 
-          <img
-            src={scene.image}
-            alt={`GEOTOON Episode ${episodeNumber} ${scene.title}`}
-            className="comic-image"
-            draggable={false}
-          />
+          {scene.type === "html" ? (
+            <iframe
+              src={scene.html}
+              title={`Episode ${episodeNumber}: ${scene.title}`}
+              className="animation-frame"
+              sandbox="allow-scripts"
+              allowFullScreen
+            />
+          ) : scene.type === "video" ? (
+            <video
+              src={scene.video}
+              className="scene-video"
+              controls
+              playsInline
+              preload="metadata"
+              aria-label={`Episode ${episodeNumber}: ${scene.title}`}
+            >
+              Browser kamu tidak mendukung pemutar video.
+            </video>
+          ) : scene.type === "game" ? (
+            scene.game === "misi-tarik-garis" ? (
+              <MisiTarikGaris key={scene.id} />
+            ) : (
+              <MisiDetektifCitra key={scene.id} />
+            )
+          ) : (
+            <img
+              src={scene.image}
+              alt={`GEOTOON Episode ${episodeNumber} ${scene.title}`}
+              className="comic-image"
+              draggable={false}
+            />
+          )}
 
         </div>
 
@@ -431,23 +578,27 @@ export default function ComicReader({
         {/* AUDIO */}
 
         <div className="audio-row">
+          {scene.type !== "game" && (
+            <>
+              <div className="audio-chip muted" role="status" aria-live="polite">
+                🎙️{" "}
+                {voiceMessage ||
+                  (isVoicePlaying
+                    ? "Sedang membacakan..."
+                    : scene.voice
+                      ? "Voice-over siap"
+                      : "Voice-over belum tersedia")}
+              </div>
 
-          <div className="audio-chip muted">
-            🎙️{" "}
-            {isVoicePlaying
-              ? "Sedang membacakan..."
-              : scene.voice
-              ? "Voice-over selesai"
-              : "Voice-over belum tersedia"}
-          </div>
-
-          <button
-            className="audio-chip"
-            onClick={replayVoice}
-            disabled={!scene.voice}
-          >
-            🔁 Replay Voice
-          </button>
+              <button
+                className="audio-chip"
+                onClick={replayVoice}
+                disabled={!scene.voice || voiceFailed}
+              >
+                {voiceFailed ? "⚠️ Audio gagal dimuat" : "🔁 Replay Voice"}
+              </button>
+            </>
+          )}
 
           <button
             className="audio-chip"
@@ -545,8 +696,9 @@ export default function ComicReader({
             marginTop: "14px",
           }}
         >
-          👆 Geser kiri / kanan pada komik
-          untuk berpindah scene
+          {scene.type === "game" || scene.type === "video"
+            ? "Gunakan tombol di atas untuk berpindah scene."
+            : "👆 Geser komik ke kiri atau kanan untuk berpindah scene."}
         </p>
 
         {/* FINISH */}
@@ -559,13 +711,34 @@ export default function ComicReader({
               🎉 Kamu sudah menyelesaikan
               Episode {String(episodeNumber).padStart(2, "0")}!
             </p>
-
-            <a
-              href={`/quiz/${episodeId}`}
-              className="button primary"
-            >
-              📝 Kerjakan Evaluasi
-            </a>
+            <div className="reader-finish-actions">
+              {nextEpisode ? (
+                <Link
+                  href={`/episode/${nextEpisode.id}`}
+                  className="button primary"
+                  onClick={stopReaderAudio}
+                >
+                  {nextEpisode.label} →
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    href="/episodes"
+                    className="button primary"
+                    onClick={stopReaderAudio}
+                  >
+                    Kembali ke Pilih Episode
+                  </Link>
+                  <Link
+                    href="/"
+                    className="button secondary"
+                    onClick={stopReaderAudio}
+                  >
+                    Kembali ke Beranda
+                  </Link>
+                </>
+              )}
+            </div>
 
           </div>
 
