@@ -19,7 +19,13 @@ html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Nunito",sy
 .grp{transition:opacity .35s}
 .dim{opacity:.06}
 .note{font-size:14px;opacity:.85;margin:10px 2px 0}
-</style></head><body>
+html.embed,html.embed body{width:100%;height:100%;overflow:hidden}
+html.embed .wrap{width:100%;height:100%;max-width:none;margin:0;padding:0}
+html.embed .bar,html.embed .note{display:none}
+html.embed .stage{width:100%;height:100%;aspect-ratio:auto;border-radius:0}
+</style><script>
+if(new URLSearchParams(location.search).has("embed"))document.documentElement.classList.add("embed");
+</script></head><body>
 <div class="wrap">
 <div class="bar" role="toolbar" aria-label="Kontrol animasi">
 <button id="play" aria-pressed="false">Jeda</button>

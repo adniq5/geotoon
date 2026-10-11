@@ -26,7 +26,6 @@ export default async function EpisodePage({
         episodeNumber={episode.number}
         title={episode.title}
         cover={episode.cover}
-        preview={episode.preview}
         coverHtml={episode.coverHtml}
         scenes={episode.scenes}
         backgroundMusic="/audio/bgm/geotoon-backsound.mp3"

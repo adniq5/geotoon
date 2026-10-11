@@ -20,7 +20,6 @@ export type Episode = {
   description: string;
   cover: string;
   coverHtml?: string;
-  preview?: string;
   scenes: Scene[];
 };
 
@@ -33,7 +32,6 @@ export const episodes: Episode[] = [
       "Sebuah perjalanan untuk memahami bumi dimulai dari sebuah peta.",
     cover: "/images/episodes/episode-01/Cover/Tampilan%20Awal%20Eps%201.png",
     coverHtml: "/animations/episode-01/cover.html",
-    preview: "/images/episodes/episode-01/Preview/Episod%201.png",
     scenes: [
       {
         id: "scene-01",
@@ -79,8 +77,7 @@ export const episodes: Episode[] = [
     description:
       "Petualangan berlanjut dengan mengenal penginderaan jauh dan cara mengamati bumi dari jarak jauh.",
     cover: "/images/episodes/episode-02/Cover/Scene%20Tampilan%20Awal%20Eps%202.png",
-    coverHtml: "/animations/episode-02/cover.html",
-    preview: "/images/episodes/episode-02/Preview/Episod%202.png",
+    coverHtml: "/animations/episode-02/cover.html?embed=1",
     scenes: [
       {
         id: "scene-01",

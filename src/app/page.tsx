@@ -8,10 +8,7 @@ export default function Home() {
   return (
     <main>
       {/* HERO */}
-      <section
-        className="hero"
-        style={{ gridTemplateColumns: 'minmax(0, 1fr)' }}
-      >
+      <section className="hero">
         <div className="hero-copy" style={{ maxWidth: '760px' }}>
           <span className="eyebrow">MEDIA PEMBELAJARAN GEOGRAFI</span>
 
@@ -35,6 +32,15 @@ export default function Home() {
               👋 Kenalan Dulu
             </a>
           </div>
+        </div>
+
+        <div className="hero-art hero-animation">
+          <iframe
+            src="/animations/episode-01/cover.html"
+            title="Animasi sampul GEOTOON Episode 1"
+            className="hero-animation-frame"
+            sandbox="allow-scripts"
+          />
         </div>
 
       </section>

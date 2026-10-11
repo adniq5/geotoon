@@ -62,7 +62,7 @@
 
 .lines {
   position: absolute;
-  z-index: 1;
+  z-index: 3;
   inset: 0;
   overflow: visible;
   pointer-events: none;
@@ -70,9 +70,10 @@
 
 .lines path {
   fill: none;
-  stroke-width: 4;
+  stroke-width: 3.5;
   stroke-linecap: round;
   vector-effect: non-scaling-stroke;
+  filter: drop-shadow(0 1px 1px rgba(16, 34, 61, 0.2));
 }
 
 .correctLine {
@@ -86,7 +87,7 @@
 
 .activeLine {
   stroke: #1877d2;
-  stroke-width: 5 !important;
+  stroke-width: 4.5 !important;
 }
 
 .column {
@@ -216,6 +217,26 @@
   border-color: #1877d2;
   background: #f0f7ff;
   box-shadow: 0 0 0 2px rgba(24, 119, 210, 0.14);
+}
+
+.functionHovered {
+  border-color: #16834b;
+  background: #eff9ed;
+  box-shadow: 0 0 0 3px rgba(22, 131, 75, 0.2);
+}
+
+.draggingRow {
+  border-color: #1877d2;
+  background: #eaf5ff;
+  box-shadow: 0 0 0 3px rgba(24, 119, 210, 0.22);
+}
+
+.draggingRow .componentButton {
+  cursor: grabbing;
+}
+
+.componentButton:active {
+  background: rgba(24, 119, 210, 0.06);
 }
 
 .correct {

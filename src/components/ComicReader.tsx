@@ -12,12 +12,11 @@ type ComicReaderProps = {
   title: string;
   cover: string;
   coverHtml?: string;
-  preview?: string;
   scenes: Scene[];
   backgroundMusic?: string;
 };
 
-type Stage = "cover" | "preview" | "scene";
+type Stage = "cover" | "scene";
 
 export default function ComicReader({
   episodeId,
@@ -25,7 +24,6 @@ export default function ComicReader({
   title,
   cover,
   coverHtml,
-  preview,
   scenes,
   backgroundMusic,
 }: ComicReaderProps) {
@@ -45,6 +43,17 @@ export default function ComicReader({
 
   const scene = scenes[current];
   const isEpisodeThreeCover = episodeId === "episode-03" && Boolean(coverHtml);
+  const isEpisodeTwoCover = episodeId === "episode-02" && Boolean(coverHtml);
+  const isEpisodeTwoSceneWithControls =
+    episodeId === "episode-02" &&
+    scene?.type === "html" &&
+    [0, 3, 4, 5, 6].includes(current);
+  const isEpisodeTwoSceneWithNotes =
+    episodeId === "episode-02" &&
+    scene?.type === "html" &&
+    [1, 2, 7].includes(current);
+  const isEpisodeTwoInteractiveScene =
+    episodeId === "episode-02" && scene?.type === "html" && current === 7;
   const nextEpisode =
     episodeId === "episode-01"
       ? { id: "episode-02", label: "Lanjut Episode 2" }
@@ -331,7 +340,11 @@ export default function ComicReader({
 
           <div
             className={`reader-frame${coverHtml ? " reader-frame-animated" : ""}${
-              isEpisodeThreeCover ? " reader-frame-episode-03-cover" : ""
+              isEpisodeThreeCover
+                ? " reader-frame-episode-03-cover"
+                : isEpisodeTwoCover
+                  ? " reader-frame-episode-02-cover"
+                  : ""
             }`}
           >
             {coverHtml ? (
@@ -350,19 +363,23 @@ export default function ComicReader({
                 draggable={false}
               />
             )}
-            {isEpisodeThreeCover && (
+            {(isEpisodeThreeCover || isEpisodeTwoCover) && (
               <div className="reader-cover-hit-area">
                 <button
                   type="button"
-                  className="reader-cover-start-target"
-                  aria-label="Mulai Petualangan Episode 3"
+                  className={`reader-cover-start-target${
+                    isEpisodeTwoCover
+                      ? " reader-cover-start-target-episode-02"
+                      : ""
+                  }`}
+                  aria-label={`Mulai Petualangan Episode ${episodeNumber}`}
                   onClick={() => void startStory()}
                 />
               </div>
             )}
           </div>
 
-          {!isEpisodeThreeCover && (
+          {!isEpisodeThreeCover && !isEpisodeTwoCover && (
             <div className="reader-finish">
               <div>
                 <div className="result-icon">🌍</div>
@@ -371,84 +388,12 @@ export default function ComicReader({
 
               <button
                 className="button primary"
-                onClick={() => {
-                  if (preview) {
-                    setStage("preview");
-                  } else {
-                    void startStory();
-                  }
-                }}
+                onClick={() => void startStory()}
               >
-                {preview ? "👀 Lihat Preview" : "▶ Mulai Petualangan"}
+                ▶ Mulai Petualangan
               </button>
             </div>
           )}
-
-        </div>
-      </section>
-    );
-  }
-
-  /*
-   * =========================
-   * PREVIEW
-   * =========================
-   */
-
-  if (stage === "preview" && preview) {
-    return (
-      <section className="reader-page page-shell">
-        <div className="reader">
-
-          <div className="reader-header">
-            <Link
-              href="/episodes"
-              className="button secondary reader-back-link"
-              onClick={stopReaderAudio}
-            >
-              <span aria-hidden="true">←</span> Pilih Episode
-            </Link>
-
-            <div className="eyebrow">
-              GEOTOON • PREVIEW EPISODE{" "}
-              {String(episodeNumber).padStart(2, "0")}
-            </div>
-
-            <h1>{title}</h1>
-
-            <p>
-              Lihat gambaran perjalanan sebelum
-              memulai cerita.
-            </p>
-
-          </div>
-
-          <div className="reader-frame">
-            <img
-              src={preview}
-              alt={`Preview GEOTOON Episode ${episodeNumber}`}
-              className="comic-image"
-              draggable={false}
-            />
-          </div>
-
-          <div className="reader-controls">
-
-            <button
-              className="button secondary"
-              onClick={() => setStage("cover")}
-            >
-              ← Kembali
-            </button>
-
-            <button
-              className="button primary"
-              onClick={startStory}
-            >
-              ▶ Mulai Cerita
-            </button>
-
-          </div>
 
         </div>
       </section>
@@ -512,7 +457,15 @@ export default function ComicReader({
         {/* COMIC */}
 
         <div
-          className={`reader-frame${scene.type === "html" ? " reader-frame-animated" : ""}${scene.type === "game" ? " reader-frame-game" : ""}`}
+          className={`reader-frame${scene.type === "html" ? " reader-frame-animated" : ""}${scene.type === "game" ? " reader-frame-game" : ""}${
+            isEpisodeTwoSceneWithControls
+              ? " reader-frame-episode-02-controls"
+              : isEpisodeTwoInteractiveScene
+                ? " reader-frame-episode-02-interactive"
+                : isEpisodeTwoSceneWithNotes
+                  ? " reader-frame-episode-02-notes"
+                  : ""
+          }`}
           onTouchStart={
             scene.type === "game" || scene.type === "video"
               ? undefined

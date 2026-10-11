@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 
 type Notes = {
@@ -7,8 +8,9 @@ type Notes = {
   interpretation: string;
   evidence: string;
   alternative: string;
-  confidence: string;
+  confidence: number;
   verification: string;
+  changeInterpretation: string;
 };
 
 type Prompt = {
@@ -17,50 +19,67 @@ type Prompt = {
   field: keyof Notes;
   label: string;
   placeholder: string;
-  secondField?: keyof Notes;
-  secondLabel?: string;
-  secondPlaceholder?: string;
+  additionalFields?: {
+    field: keyof Notes;
+    label: string;
+    placeholder: string;
+  }[];
 };
 
 const prompts: Prompt[] = [
   {
-    title: "Amati citra",
+    title: "Tahap 1 — Pengamatan",
     description:
-      "Catat hal yang benar-benar terlihat. Perhatikan rona atau warna, bentuk, ukuran, tekstur, pola, bayangan, dan susunan objek. Tahan dulu kesimpulanmu.",
+      "Catat apa yang benar-benar terlihat pada citra tanpa langsung menebak.",
     field: "observations",
-    label: "Apa saja ciri yang kamu amati?",
+    label:
+      "Apa saja bentuk, warna atau rona, pola, tekstur, dan susunan objek yang kamu amati?",
     placeholder:
-      "Contoh: ada bidang memanjang berwarna biru, beberapa petak berpola teratur, dan area hijau bertekstur rapat...",
+      "Contoh: terlihat garis berkelok, area hijau luas, dan kumpulan bentuk kecil...",
   },
   {
-    title: "Susun interpretasi",
+    title: "Tahap 2 — Interpretasi",
     description:
-      "Buat dugaan tentang objek atau fungsi wilayah. Hubungkan dugaanmu dengan ciri yang kamu amati; tidak harus sama dengan dugaan teman.",
+      "Gunakan hasil pengamatan untuk menyusun dugaan tentang kenampakan wilayah.",
     field: "interpretation",
-    label: "Apa dugaanmu, dan bagaimana ciri citra mendukungnya?",
-    placeholder:
-      "Menurut saya, area ... mungkin merupakan ... karena ciri ... menunjukkan ...",
+    label:
+      "Menurutmu, objek atau penggunaan lahan apa yang mungkin terlihat? Jelaskan interpretasimu.",
+    placeholder: "Menurut saya, area ini kemungkinan merupakan ... karena ...",
   },
   {
-    title: "Uji bukti dan kemungkinan lain",
+    title: "Tahap 3 — Bukti dan Alasan",
     description:
-      "Pilih bukti visual yang paling kuat untuk mendukung dugaanmu. Lalu pertimbangkan satu penjelasan alternatif yang juga mungkin.",
+      "Hubungkan dugaanmu dengan petunjuk visual yang benar-benar terlihat.",
     field: "evidence",
-    label: "Bukti apa yang paling mendukung dugaanmu?",
-    placeholder: "Ciri yang paling mendukung adalah ... karena ...",
-    secondField: "alternative",
-    secondLabel: "Interpretasi lain apa yang mungkin?",
-    secondPlaceholder:
-      "Alternatif lain bisa jadi ... Saya akan membedakannya dengan melihat ...",
+    label:
+      "Petunjuk apa pada citra yang paling mendukung interpretasimu? Mengapa petunjuk itu relevan?",
+    placeholder:
+      "Bukti yang mendukung dugaan saya adalah ... Petunjuk ini menunjukkan ...",
   },
   {
-    title: "Refleksikan kesimpulan",
+    title: "Tahap 4 — Uji Dugaan",
     description:
-      "Tentukan seberapa yakin kamu—bukan untuk mencari skor benar atau salah. Sebutkan informasi tambahan yang akan membantu menguji dugaanmu.",
-    field: "verification",
-    label: "Informasi atau data apa yang perlu diperiksa berikutnya?",
+      "Pikirkan kemungkinan lain. Satu bentuk pada citra belum tentu hanya memiliki satu arti.",
+    field: "alternative",
+    label:
+      "Adakah interpretasi lain yang juga masuk akal? Jelaskan kemungkinan lain tersebut.",
     placeholder:
-      "Saya ingin membandingkan citra dari waktu lain, melihat legenda, atau mencari data pendukung seperti ...",
+      "Interpretasi lain yang juga masuk akal adalah ... karena ...",
+    additionalFields: [
+      {
+        field: "verification",
+        label:
+          "Informasi tambahan apa yang kamu perlukan untuk memastikannya?",
+        placeholder:
+          "Misalnya: citra dengan resolusi lebih tinggi, data lapangan, atau informasi waktu pengambilan citra...",
+      },
+      {
+        field: "changeInterpretation",
+        label: "Apa yang dapat membuatmu mengubah interpretasi?",
+        placeholder:
+          "Saya akan mengubah interpretasi jika menemukan ... karena ...",
+      },
+    ],
   },
 ];
 
@@ -69,8 +88,9 @@ const emptyNotes: Notes = {
   interpretation: "",
   evidence: "",
   alternative: "",
-  confidence: "",
+  confidence: 3,
   verification: "",
+  changeInterpretation: "",
 };
 
 function createReport(name: string, notes: Notes) {
@@ -84,13 +104,14 @@ function createReport(name: string, notes: Notes) {
     "2. Interpretasi",
     notes.interpretation.trim(),
     "",
-    "3. Bukti dan interpretasi alternatif",
+    "3. Bukti dan alasan",
     `Bukti pendukung: ${notes.evidence.trim()}`,
-    `Interpretasi alternatif: ${notes.alternative.trim()}`,
     "",
-    "4. Refleksi",
-    `Tingkat keyakinan: ${notes.confidence}`,
+    "4. Uji dugaan",
+    `Interpretasi alternatif: ${notes.alternative.trim()}`,
+    `Tingkat keyakinan: ${notes.confidence}/5`,
     `Informasi tambahan yang diperlukan: ${notes.verification.trim()}`,
+    `Hal yang dapat mengubah interpretasi: ${notes.changeInterpretation.trim()}`,
   ].join("\n");
 }
 
@@ -107,9 +128,20 @@ export default function MisiDetektifCitra() {
   const canContinue = () => {
     if (step < 0) return name.trim().length > 0;
     const prompt = prompts[step];
-    if (!prompt || !notes[prompt.field].trim()) return false;
-    if (prompt.secondField && !notes[prompt.secondField].trim()) return false;
-    if (step === 3 && !notes.confidence) return false;
+    if (!prompt) return false;
+    const primaryAnswer = notes[prompt.field];
+    if (typeof primaryAnswer !== "string" || !primaryAnswer.trim())
+      return false;
+    if (
+      prompt.additionalFields?.some(
+        ({ field }) => {
+          const value = notes[field];
+          return typeof value !== "string" || !value.trim();
+        }
+      )
+    ) {
+      return false;
+    }
     return true;
   };
 
@@ -176,12 +208,11 @@ export default function MisiDetektifCitra() {
   }
 
   const prompt = step >= 0 ? prompts[step] : undefined;
-  const secondField = prompt?.secondField;
 
   return (
     <section className="detective-game" aria-labelledby="detective-title">
       <div className="detective-heading">
-        <span className="eyebrow">GEOTOON • KELAS X</span>
+        <span className="eyebrow">GEOTOON</span>
         <h2 id="detective-title">Misi Detektif Citra</h2>
         <p>
           Jangan buru-buru menyimpulkan. Amati petunjuk, susun alasan, lalu uji
@@ -189,49 +220,18 @@ export default function MisiDetektifCitra() {
         </p>
       </div>
 
-      <div className="detective-image">
-        <svg
-          viewBox="0 0 720 360"
-          role="img"
-          aria-label="Citra latihan ilustratif yang menampilkan sungai, petak lahan, vegetasi, dan permukiman"
-        >
-          <rect width="720" height="360" fill="#d8e5b5" />
-          <path d="M0 0h280l-23 99-104 31-28 96L0 244z" fill="#a8c982" />
-          <path d="M405 0h315v132l-76 32-57-46-124 16-80-71z" fill="#8cba75" />
-          <path d="M0 277l95-28 58 35 115-9 56 85H0z" fill="#8ebc74" />
-          <path d="M441 217l107-47 45 29 127-10v171H462l-28-71z" fill="#abc985" />
-          <path d="M318-20c-36 61 30 84-3 139s-3 71-43 115 4 83-31 146" fill="none" stroke="#62a9c6" strokeWidth="38" />
-          <path d="M318-20c-36 61 30 84-3 139s-3 71-43 115 4 83-31 146" fill="none" stroke="#a3d7e2" strokeWidth="21" />
-          <g fill="#d8bd82" stroke="#f2dfae" strokeWidth="4">
-            <path d="M30 34h77v53H30z" />
-            <path d="M115 34h77v53h-77z" />
-            <path d="M200 34h56v53h-56z" />
-            <path d="M36 96h74v56H36z" />
-            <path d="M118 96h94v56h-94z" />
-            <path d="M34 161h72v49H34z" />
-            <path d="M115 161h81v49h-81z" />
-            <path d="M491 47h76v54h-76z" />
-            <path d="M576 47h104v54H576z" />
-            <path d="M502 110h91v53h-91z" />
-            <path d="M602 110h78v53h-78z" />
-          </g>
-          <g fill="#748e5d">
-            <circle cx="44" cy="251" r="11" /><circle cx="73" cy="235" r="9" />
-            <circle cx="98" cy="258" r="12" /><circle cx="133" cy="237" r="10" />
-            <circle cx="173" cy="267" r="12" /><circle cx="203" cy="246" r="10" />
-            <circle cx="510" cy="219" r="12" /><circle cx="543" cy="202" r="10" />
-            <circle cx="581" cy="231" r="12" /><circle cx="622" cy="209" r="10" />
-            <circle cx="660" cy="240" r="11" /><circle cx="544" cy="285" r="11" />
-            <circle cx="591" cy="300" r="12" /><circle cx="641" cy="280" r="10" />
-          </g>
-          <path d="M415 0l43 96-9 83 61 62 33 119M0 225l136 34 110-10 116 48 111-20 99 40" fill="none" stroke="#eee5cc" strokeWidth="8" />
-          <path d="M415 0l43 96-9 83 61 62 33 119M0 225l136 34 110-10 116 48 111-20 99 40" fill="none" stroke="#b8a681" strokeWidth="2" strokeDasharray="8 7" />
-        </svg>
-        <p>
-          Citra latihan ilustratif. Tidak mewakili lokasi nyata; buat dugaanmu
-          sendiri dari petunjuk visual.
-        </p>
-      </div>
+      <figure className="detective-image">
+        <Image
+          src="/animations/episode-03/citra-game-2.jpg"
+          alt="Foto udara menampilkan sungai berkelok, petak pertanian, vegetasi, dan permukiman"
+          width={1200}
+          height={800}
+          priority
+        />
+        <figcaption>
+          Sumber: Pexels/Tom Fisk
+        </figcaption>
+      </figure>
 
       {step === -1 ? (
         <div className="detective-briefing">
@@ -258,7 +258,7 @@ export default function MisiDetektifCitra() {
       ) : (
         <>
           <div className="detective-progress">
-            <span>Tahap {step + 1} dari {prompts.length}</span>
+            <span>Tahap {step + 1}/{prompts.length}</span>
             <div
               className="progress-track"
               role="progressbar"
@@ -267,7 +267,9 @@ export default function MisiDetektifCitra() {
               aria-valuemax={prompts.length}
               aria-valuenow={step + 1}
             >
-              <span style={{ width: `${((step + 1) / prompts.length) * 100}%` }} />
+              <span
+                style={{ width: `${((step + 1) / prompts.length) * 100}%` }}
+              />
             </div>
           </div>
           <div className="detective-prompt">
@@ -287,26 +289,28 @@ export default function MisiDetektifCitra() {
                   rows={4}
                   placeholder={prompt.placeholder}
                 />
-                {secondField && prompt.secondLabel && prompt.secondPlaceholder && (
-                  <>
-                    <label
-                      className="detective-label"
-                      htmlFor={`detective-${secondField}`}
-                    >
-                      {prompt.secondLabel}
-                    </label>
-                    <textarea
-                      id={`detective-${secondField}`}
-                      className="detective-input detective-textarea"
-                      value={notes[secondField]}
-                      onChange={(event) =>
-                        updateNote(secondField, event.target.value)
-                      }
-                      maxLength={1200}
-                      rows={3}
-                      placeholder={prompt.secondPlaceholder}
-                    />
-                  </>
+                {prompt.additionalFields?.map(
+                  ({ field, label, placeholder }) => (
+                    <div key={field}>
+                      <label
+                        className="detective-label"
+                        htmlFor={`detective-${field}`}
+                      >
+                        {label}
+                      </label>
+                      <textarea
+                        id={`detective-${field}`}
+                        className="detective-input detective-textarea"
+                        value={notes[field]}
+                        onChange={(event) =>
+                          updateNote(field, event.target.value)
+                        }
+                        maxLength={1200}
+                        rows={4}
+                        placeholder={placeholder}
+                      />
+                    </div>
+                  )
                 )}
                 {step === 3 && (
                   <>
@@ -314,21 +318,47 @@ export default function MisiDetektifCitra() {
                       className="detective-label"
                       htmlFor="detective-confidence"
                     >
-                      Seberapa yakin kamu dengan dugaanmu?
+                      Seberapa yakin kamu dengan dugaanmu?{" "}
+                      <output className="detective-confidence-value">
+                        {notes.confidence}/5 —{" "}
+                        {notes.confidence === 1
+                          ? "Masih sangat ragu"
+                          : notes.confidence === 3
+                            ? "Cukup yakin"
+                            : notes.confidence === 5
+                              ? "Sangat yakin"
+                              : "Yakin"}
+                      </output>
                     </label>
-                    <select
+                    <input
                       id="detective-confidence"
+                      type="range"
                       className="detective-input"
+                      min={1}
+                      max={5}
+                      step={1}
                       value={notes.confidence}
-                      onChange={(event) =>
-                        updateNote("confidence", event.target.value)
+                      aria-valuetext={
+                        notes.confidence === 1
+                          ? "1 dari 5, masih sangat ragu"
+                          : notes.confidence === 3
+                            ? "3 dari 5, cukup yakin"
+                            : notes.confidence === 5
+                              ? "5 dari 5, sangat yakin"
+                              : `${notes.confidence} dari 5`
                       }
-                    >
-                      <option value="">Pilih tingkat keyakinan</option>
-                      <option value="Masih menjajaki">Masih menjajaki</option>
-                      <option value="Cukup yakin">Cukup yakin</option>
-                      <option value="Sangat yakin">Sangat yakin</option>
-                    </select>
+                      onChange={(event) =>
+                        setNotes((previous) => ({
+                          ...previous,
+                          confidence: Number(event.target.value),
+                        }))
+                      }
+                    />
+                    <div className="detective-confidence-scale" aria-hidden="true">
+                      <span>1 — Masih sangat ragu</span>
+                      <span>3 — Cukup yakin</span>
+                      <span>5 — Sangat yakin</span>
+                    </div>
                   </>
                 )}
               </>
@@ -357,7 +387,7 @@ export default function MisiDetektifCitra() {
           {step < 0
             ? "Mulai penyelidikan"
             : step === prompts.length - 1
-              ? "Selesaikan misi"
+              ? "Selesaikan Misi"
               : "Lanjutkan →"}
         </button>
       </div>

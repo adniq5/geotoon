@@ -39,7 +39,11 @@ const answers: Record<ComponentId, FunctionId> = {
 };
 
 function getPath(start: Point, end: Point) {
-  return `M ${start.x} ${start.y} L ${end.x} ${end.y}`;
+  const direction = end.x >= start.x ? 1 : -1;
+  const bend = Math.max(36, Math.abs(end.x - start.x) * 0.42);
+  return `M ${start.x} ${start.y} C ${
+    start.x + bend * direction
+  } ${start.y}, ${end.x - bend * direction} ${end.y}, ${end.x} ${end.y}`;
 }
 
 function ComponentIcon({ type }: { type: (typeof components)[number]["icon"] }) {
@@ -100,8 +104,11 @@ export default function MisiTarikGaris() {
     component: ComponentId;
     pointerId: number;
     start: Point;
+    latestPoint: Point;
     moved: boolean;
   } | null>(null);
+  const activePathRef = useRef<SVGPathElement>(null);
+  const animationFrameRef = useRef<number | null>(null);
   const ignoreClickRef = useRef(false);
   const [connections, setConnections] = useState<Connection[]>([]);
   const [selectedComponent, setSelectedComponent] =
@@ -110,7 +117,10 @@ export default function MisiTarikGaris() {
     Map<string, { start: Point; end: Point }>
   >(new Map());
   const [dragStart, setDragStart] = useState<Point | null>(null);
-  const [dragPoint, setDragPoint] = useState<Point | null>(null);
+  const [draggingComponent, setDraggingComponent] =
+    useState<ComponentId | null>(null);
+  const [hoveredFunction, setHoveredFunction] =
+    useState<FunctionId | null>(null);
   const [message, setMessage] = useState(
     "Pilih komponen lalu pilih fungsi, atau tarik garis ke fungsi yang sesuai."
   );
@@ -152,14 +162,23 @@ export default function MisiTarikGaris() {
     measureConnections();
 
     const board = boardRef.current;
-    if (!board || typeof ResizeObserver === "undefined") return;
+    if (!board) return;
 
-    const observer = new ResizeObserver(measureConnections);
-    observer.observe(board);
-    componentRefs.current.forEach((element) => observer.observe(element));
-    functionRefs.current.forEach((element) => observer.observe(element));
+    const observer =
+      typeof ResizeObserver === "undefined"
+        ? null
+        : new ResizeObserver(measureConnections);
+    observer?.observe(board);
+    componentRefs.current.forEach((element) => observer?.observe(element));
+    functionRefs.current.forEach((element) => observer?.observe(element));
+    window.addEventListener("resize", measureConnections);
+    window.addEventListener("orientationchange", measureConnections);
 
-    return () => observer.disconnect();
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener("resize", measureConnections);
+      window.removeEventListener("orientationchange", measureConnections);
+    };
   }, [measureConnections]);
 
   const connect = (component: ComponentId, functionId: FunctionId) => {
@@ -213,11 +232,13 @@ export default function MisiTarikGaris() {
       component,
       pointerId: event.pointerId,
       start,
+      latestPoint: start,
       moved: false,
     };
     setSelectedComponent(component);
+    setDraggingComponent(component);
+    setHoveredFunction(null);
     setDragStart(start);
-    setDragPoint(start);
     event.currentTarget.setPointerCapture(event.pointerId);
   };
 
@@ -233,15 +254,34 @@ export default function MisiTarikGaris() {
       x: event.clientX - boardRect.left,
       y: event.clientY - boardRect.top,
     };
-    if (
-      Math.hypot(
-        point.x - activePointer.start.x,
-        point.y - activePointer.start.y
-      ) > 8
-    ) {
+    if (Math.hypot(point.x - activePointer.start.x, point.y - activePointer.start.y) > 8) {
       activePointer.moved = true;
     }
-    setDragPoint(point);
+    activePointer.latestPoint = point;
+
+    const element = document.elementFromPoint(event.clientX, event.clientY);
+    const target = element?.closest<HTMLElement>("[data-function-id]");
+    const functionId =
+      functions.find(
+        (functionItem) => functionItem.id === target?.dataset.functionId
+      )?.id ?? null;
+    setHoveredFunction((current) =>
+      current === functionId ? current : functionId
+    );
+
+    if (animationFrameRef.current === null) {
+      animationFrameRef.current = window.requestAnimationFrame(() => {
+        animationFrameRef.current = null;
+        const currentPointer = activePointerRef.current;
+        const path = activePathRef.current;
+        if (currentPointer && path) {
+          path.setAttribute(
+            "d",
+            getPath(currentPointer.start, currentPointer.latestPoint)
+          );
+        }
+      });
+    }
   };
 
   const handlePointerUp = (event: PointerEvent<HTMLDivElement>) => {
@@ -255,15 +295,40 @@ export default function MisiTarikGaris() {
     )?.id;
     if (functionId && activePointer.moved) {
       connect(activePointer.component, functionId);
+    } else if (activePointer.moved) {
+      setMessage(
+        "Lepaskan pada fungsi yang ingin dipasangkan. Komponen tetap dipilih untuk dicoba lagi."
+      );
+    }
+    if (activePointer.moved) {
       ignoreClickRef.current = true;
       window.setTimeout(() => {
         ignoreClickRef.current = false;
       }, 0);
     }
 
+    if (animationFrameRef.current !== null) {
+      window.cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
     activePointerRef.current = null;
     setDragStart(null);
-    setDragPoint(null);
+    setDraggingComponent(null);
+    setHoveredFunction(null);
+  };
+
+  const cancelDrag = () => {
+    if (animationFrameRef.current !== null) {
+      window.cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+    activePointerRef.current = null;
+    setDragStart(null);
+    setDraggingComponent(null);
+    setHoveredFunction(null);
+    setMessage(
+      "Tarikan dibatalkan. Komponen tetap dipilih; pilih fungsi atau coba tarik lagi."
+    );
   };
 
   const selectComponent = (component: ComponentId) => {
@@ -320,11 +385,7 @@ export default function MisiTarikGaris() {
         ref={boardRef}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
-        onPointerCancel={() => {
-          activePointerRef.current = null;
-          setDragStart(null);
-          setDragPoint(null);
-        }}
+        onPointerCancel={cancelDrag}
       >
         <svg
           className={styles.lines}
@@ -345,9 +406,13 @@ export default function MisiTarikGaris() {
               />
             );
           })}
-          {dragStart && dragPoint && (
+          {dragStart && activePointerRef.current && (
             <path
-              d={getPath(dragStart, dragPoint)}
+              ref={activePathRef}
+              d={getPath(
+                dragStart,
+                activePointerRef.current.latestPoint
+              )}
               className={styles.activeLine}
             />
           )}
@@ -365,7 +430,9 @@ export default function MisiTarikGaris() {
               <div
                 className={`${styles.componentRow} ${
                   selected ? styles.selectedRow : ""
-                } ${result ? styles[result] : ""}`}
+                } ${result ? styles[result] : ""} ${
+                  draggingComponent === component.id ? styles.draggingRow : ""
+                }`}
                 key={component.id}
               >
                 <button
@@ -423,6 +490,10 @@ export default function MisiTarikGaris() {
               <button
                 className={`${styles.functionRow} ${
                   selectedComponent ? styles.functionReady : ""
+                } ${
+                  hoveredFunction === functionItem.id
+                    ? styles.functionHovered
+                    : ""
                 }`}
                 type="button"
                 key={functionItem.id}
