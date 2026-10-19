@@ -6,5 +6,13 @@
   "display": "standalone",
   "background_color": "#fffaf0",
   "theme_color": "#10223d",
-  "lang": "id-ID"
+  "lang": "id-ID",
+  "icons": [
+    {
+      "src": "/images/characters/pengenalan-geotoon.png",
+      "sizes": "1536x1024",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
 }

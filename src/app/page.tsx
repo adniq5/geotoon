@@ -46,7 +46,7 @@ export default function Home() {
       </section>
 
       {/* KENALAN DENGAN TOKOH */}
-      <section className="section" id="kenalan">
+      <section className="section homepage-character-section" id="kenalan">
         <div className="section-heading">
           <span className="eyebrow">KENALAN DULU</span>
 
@@ -69,8 +69,24 @@ export default function Home() {
         />
       </section>
 
+      {/* PENUTUP BERSAMA */}
+      <section className="section homepage-closing-section" id="penutup">
+        <h3 style={{ margin: '0 0 16px', fontSize: '1.4rem' }}>
+          Penutup Bersama
+        </h3>
+        <div>
+          <HomepageAnimation
+            src="/animations/characters/closing.html"
+            title="Animasi Penutup Bersama GEOTOON"
+            audioSrc="/audio/introduction/penutup-perkenalan.mp3"
+            audioLabel="voice-over penutup GEOTOON"
+            aspectRatio="1536 / 189"
+          />
+        </div>
+      </section>
+
       {/* TENTANG GEOTOON */}
-      <section className="section" id="tentang">
+      <section className="section homepage-about-section" id="tentang">
         <div className="section-heading">
           <span className="eyebrow">TENTANG GEOTOON</span>
 
@@ -81,18 +97,6 @@ export default function Home() {
           musik latar agar siswa dapat belajar Geografi melalui cerita
           yang menarik dan interaktif.
           </p>
-        </div>
-        <h3 style={{ margin: '0 0 16px', fontSize: '1.4rem' }}>
-          Penutup Bersama
-        </h3>
-        <div style={{ marginBottom: '28px' }}>
-          <HomepageAnimation
-            src="/animations/characters/closing.html"
-            title="Animasi Penutup Bersama GEOTOON"
-            audioSrc="/audio/introduction/penutup-perkenalan.mp3"
-            audioLabel="voice-over penutup GEOTOON"
-            aspectRatio="1536 / 189"
-          />
         </div>
         <div className="feature-grid homepage-feature-grid">
           <div className="feature">
@@ -129,6 +133,15 @@ export default function Home() {
               </a>
             </small>
           </div>
+
+          <Link href="/tentang" className="feature feature-link">
+            👥
+            <strong>Profil Tim GEOTOON</strong>
+            <span>
+              Kenali pihak yang berkontribusi dalam pembuatan media ini.
+            </span>
+            <span className="feature-link-action">Lihat profil tim →</span>
+          </Link>
         </div>
       </section>
 

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import MisiDetektifCitra from "@/components/MisiDetektifCitra";
 import MisiTarikGaris from "@/components/MisiTarikGaris";
-import type { Scene } from "@/data/episodes";
+import type { Scene, TimedCue } from "@/data/episodes";
 
 type ComicReaderProps = {
   episodeId: string;
@@ -31,17 +31,28 @@ export default function ComicReader({
   const [current, setCurrent] = useState(0);
 
   const [isVoicePlaying, setIsVoicePlaying] = useState(false);
+  const [isVoicePaused, setIsVoicePaused] = useState(false);
+  const [isVoiceEnabled, setIsVoiceEnabled] = useState(true);
   const [voiceFailed, setVoiceFailed] = useState(false);
   const [voiceMessage, setVoiceMessage] = useState("");
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+  const [isCcEnabled, setIsCcEnabled] = useState(false);
+  const [activeCue, setActiveCue] = useState<TimedCue | null>(null);
 
   const voiceRef = useRef<HTMLAudioElement | null>(null);
   const musicRef = useRef<HTMLAudioElement | null>(null);
   const voiceSessionRef = useRef(0);
+  const voiceEnabledRef = useRef(true);
+  const animationFrameRef = useRef<HTMLIFrameElement | null>(null);
+  const activeCueRef = useRef<TimedCue | null>(null);
 
   const touchStartX = useRef<number | null>(null);
 
   const scene = scenes[current];
+  const timedCues = scene?.subtitleCues ?? scene?.timedCues;
+  const hasVoice = Boolean(scene?.voice);
+  const hasTimedCues = Boolean(hasVoice && timedCues?.length);
+  const hasCcFrame = episodeId === "episode-01" || episodeId === "episode-02";
   const isEpisodeThreeCover = episodeId === "episode-03" && Boolean(coverHtml);
   const isEpisodeTwoCover = episodeId === "episode-02" && Boolean(coverHtml);
   const isEpisodeTwoSceneWithControls =
@@ -63,24 +74,53 @@ export default function ComicReader({
 
   const stopCurrentVoice = useCallback(() => {
     voiceSessionRef.current += 1;
+    const previousVisual = activeCueRef.current?.visual;
 
     const currentVoice = voiceRef.current;
 
     if (!currentVoice) {
       setIsVoicePlaying(false);
+      setIsVoicePaused(false);
       setVoiceFailed(false);
       setVoiceMessage("");
+      activeCueRef.current = null;
+      setActiveCue(null);
+      if (previousVisual) {
+        animationFrameRef.current?.contentWindow?.postMessage(
+          {
+            type: "geotoon:playback-cue",
+            visual: { ...previousVisual, action: "clear" },
+          },
+          "*"
+        );
+      }
       return;
     }
 
     currentVoice.onended = null;
     currentVoice.onerror = null;
+    currentVoice.onplaying = null;
+    currentVoice.onpause = null;
+    currentVoice.ontimeupdate = null;
+    currentVoice.onseeked = null;
     currentVoice.pause();
     currentVoice.currentTime = 0;
     voiceRef.current = null;
     setIsVoicePlaying(false);
+    setIsVoicePaused(false);
     setVoiceFailed(false);
     setVoiceMessage("");
+    activeCueRef.current = null;
+    setActiveCue(null);
+    if (previousVisual) {
+      animationFrameRef.current?.contentWindow?.postMessage(
+        {
+          type: "geotoon:playback-cue",
+          visual: { ...previousVisual, action: "clear" },
+        },
+        "*"
+      );
+    }
   }, []);
 
   const stopReaderAudio = useCallback(() => {
@@ -103,26 +143,88 @@ export default function ComicReader({
       voice.volume = 1;
       voiceRef.current = voice;
       setVoiceFailed(false);
-      setVoiceMessage(`Memutar voice-over ${sceneLabel.toLowerCase()}...`);
-      setIsVoicePlaying(true);
+      setVoiceMessage(`Menyiapkan voice-over ${sceneLabel.toLowerCase()}...`);
+      setIsVoicePlaying(false);
+      setIsVoicePaused(false);
 
       voice.onended = () => {
         if (voiceSessionRef.current !== session) return;
 
         voiceRef.current = null;
         setIsVoicePlaying(false);
+        setIsVoicePaused(false);
+        activeCueRef.current = null;
+        setActiveCue(null);
         setVoiceMessage(`Voice-over ${sceneLabel} selesai.`);
       };
+
+      voice.onplaying = () => {
+        if (voiceSessionRef.current !== session) return;
+        setIsVoicePlaying(true);
+        setIsVoicePaused(false);
+        setVoiceMessage(`Sedang memutar voice-over ${sceneLabel.toLowerCase()}...`);
+      };
+
+      voice.onpause = () => {
+        if (
+          voiceSessionRef.current !== session ||
+          voice.ended ||
+          !voice.paused
+        ) {
+          return;
+        }
+        setIsVoicePlaying(false);
+        setIsVoicePaused(true);
+      };
+
+      const updateTimedCue = () => {
+        if (voiceSessionRef.current !== session) return;
+        const cue =
+          timedCues?.find(
+            (item) =>
+              voice.currentTime >= item.startSeconds &&
+              voice.currentTime < item.endSeconds
+          ) ?? null;
+        if (activeCueRef.current === cue) return;
+
+        const previousVisual = activeCueRef.current?.visual;
+        activeCueRef.current = cue;
+        setActiveCue(cue);
+        if (cue?.visual) {
+          animationFrameRef.current?.contentWindow?.postMessage(
+            {
+              type: "geotoon:playback-cue",
+              visual: cue.visual,
+            },
+            "*"
+          );
+        } else if (previousVisual) {
+          animationFrameRef.current?.contentWindow?.postMessage(
+            {
+              type: "geotoon:playback-cue",
+              visual: { ...previousVisual, action: "clear" },
+            },
+            "*"
+          );
+        }
+      };
+      voice.ontimeupdate = updateTimedCue;
+      voice.onseeked = updateTimedCue;
 
       voice.onerror = () => {
         if (voiceSessionRef.current !== session) return;
 
         voiceRef.current = null;
         setIsVoicePlaying(false);
+        setIsVoicePaused(false);
         setVoiceFailed(true);
+        voiceEnabledRef.current = false;
+        setIsVoiceEnabled(false);
         setVoiceMessage(
           `Voice-over ${sceneLabel} gagal dimuat. Silakan periksa koneksi lalu buka ulang scene ini.`
         );
+        activeCueRef.current = null;
+        setActiveCue(null);
       };
 
       voice.play().catch(() => {
@@ -130,13 +232,18 @@ export default function ComicReader({
 
         voiceRef.current = null;
         setIsVoicePlaying(false);
+        setIsVoicePaused(false);
         setVoiceFailed(true);
+        voiceEnabledRef.current = false;
+        setIsVoiceEnabled(false);
         setVoiceMessage(
           `Voice-over ${sceneLabel} tidak dapat diputar. Silakan coba lagi.`
         );
+        activeCueRef.current = null;
+        setActiveCue(null);
       });
     },
-    [current, stopCurrentVoice]
+    [current, timedCues, stopCurrentVoice]
   );
 
   /*
@@ -170,6 +277,11 @@ export default function ComicReader({
 
   useEffect(() => {
     if (stage !== "scene") {
+      stopCurrentVoice();
+      return;
+    }
+
+    if (!voiceEnabledRef.current) {
       stopCurrentVoice();
       return;
     }
@@ -242,8 +354,55 @@ export default function ComicReader({
   const replayVoice = () => {
     if (!scene?.voice) return;
 
+    voiceEnabledRef.current = true;
+    setIsVoiceEnabled(true);
     playVoice(scene.voice);
   };
+
+  const toggleVoice = () => {
+    if (!scene?.voice) return;
+    if (voiceEnabledRef.current) {
+      voiceEnabledRef.current = false;
+      setIsVoiceEnabled(false);
+      stopCurrentVoice();
+      setVoiceMessage("Suara tokoh dimatikan.");
+      return;
+    }
+
+    voiceEnabledRef.current = true;
+    setIsVoiceEnabled(true);
+    playVoice(scene.voice);
+  };
+
+  const toggleVoicePause = async () => {
+    const audio = voiceRef.current;
+    if (!audio) return;
+    if (!audio.paused) {
+      audio.pause();
+      return;
+    }
+
+    try {
+      await audio.play();
+    } catch {
+      voiceRef.current = null;
+      setIsVoicePlaying(false);
+      setIsVoicePaused(false);
+      setVoiceFailed(true);
+      voiceEnabledRef.current = false;
+      setIsVoiceEnabled(false);
+      setVoiceMessage("Voice-over tidak dapat dilanjutkan. Tekan Suara Tokoh untuk mencoba lagi.");
+    }
+  };
+
+  const toggleCaptions = () => {
+    if (!hasCcFrame) return;
+    setIsCcEnabled((enabled) => !enabled);
+  };
+
+  useEffect(() => {
+    setIsCcEnabled(false);
+  }, [current, hasTimedCues]);
 
   /*
    * =========================
@@ -333,9 +492,11 @@ export default function ComicReader({
 
             <h1>{title}</h1>
 
-            <p>
-              Ikuti cerita dan aktivitas interaktif untuk belajar Geografi.
-            </p>
+            {!isEpisodeTwoCover && (
+              <p>
+                Ikuti cerita dan aktivitas interaktif untuk belajar Geografi.
+              </p>
+            )}
           </div>
 
           <div
@@ -480,11 +641,25 @@ export default function ComicReader({
 
           {scene.type === "html" ? (
             <iframe
+              ref={animationFrameRef}
               src={scene.html}
               title={`Episode ${episodeNumber}: ${scene.title}`}
               className="animation-frame"
-              sandbox="allow-scripts"
+              sandbox={
+                episodeId === "episode-01" && current === 0
+                  ? "allow-scripts allow-same-origin"
+                  : "allow-scripts"
+              }
               allowFullScreen
+              onLoad={() => {
+                const visual = activeCueRef.current?.visual;
+                if (visual) {
+                  animationFrameRef.current?.contentWindow?.postMessage(
+                    { type: "geotoon:playback-cue", visual },
+                    "*"
+                  );
+                }
+              }}
             />
           ) : scene.type === "video" ? (
             <video
@@ -514,6 +689,24 @@ export default function ComicReader({
 
         </div>
 
+        {hasCcFrame && (
+          <div
+            className={`reader-cc-frame${isCcEnabled ? " is-enabled" : ""}`}
+            role="status"
+            aria-live="polite"
+            aria-label="Bingkai closed captions"
+          >
+            {!isCcEnabled
+              ? "CC nonaktif"
+              : activeCue?.text ??
+                (scene.subtitleStatus === "awaiting-voice"
+                  ? "Subtitle menunggu file voice-over Episode 2."
+                  : scene.subtitleStatus === "awaiting-timestamps"
+                    ? "Subtitle menunggu pengukuran timestamp dari audio aktual."
+                    : "Menunggu subtitle berikutnya.")}
+          </div>
+        )}
+
         {/* SCENE TITLE */}
 
         <div
@@ -539,26 +732,62 @@ export default function ComicReader({
         {/* AUDIO */}
 
         <div className="audio-row">
-          {scene.type !== "game" && (
+          {hasVoice ? (
             <>
               <div className="audio-chip muted" role="status" aria-live="polite">
                 🎙️{" "}
                 {voiceMessage ||
                   (isVoicePlaying
-                    ? "Sedang membacakan..."
-                    : scene.voice
-                      ? "Voice-over siap"
-                      : "Voice-over belum tersedia")}
+                    ? "Suara tokoh sedang diputar"
+                    : isVoicePaused
+                      ? "Suara tokoh dijeda"
+                      : voiceFailed
+                        ? "Voice-over gagal diputar"
+                        : "Voice-over siap")}
               </div>
 
               <button
                 className="audio-chip"
-                onClick={replayVoice}
-                disabled={!scene.voice || voiceFailed}
+                onClick={toggleVoice}
+                aria-pressed={Boolean(isVoiceEnabled && !voiceFailed)}
               >
-                {voiceFailed ? "⚠️ Audio gagal dimuat" : "🔁 Replay Voice"}
+                {isVoiceEnabled && !voiceFailed
+                  ? "🔊 Suara Tokoh: ON"
+                  : "🔇 Suara Tokoh: OFF"}
               </button>
+
+              <button
+                className="audio-chip"
+                onClick={toggleVoicePause}
+                disabled={!isVoicePlaying && !isVoicePaused}
+              >
+                {isVoicePlaying
+                  ? "⏸️ Jeda narasi"
+                  : isVoicePaused
+                    ? "▶️ Lanjutkan narasi"
+                    : "⏸️ Jeda narasi"}
+              </button>
+
+              <button
+                className="audio-chip"
+                onClick={replayVoice}
+                disabled={!isVoiceEnabled}
+              >
+                🔁 Replay Voice
+              </button>
+
             </>
+          ) : null}
+
+          {hasCcFrame && (
+            <button
+              className="audio-chip"
+              onClick={toggleCaptions}
+              aria-pressed={isCcEnabled}
+              title="Tampilkan atau sembunyikan bingkai closed captions"
+            >
+              {`CC ${isCcEnabled ? "ON" : "OFF"}`}
+            </button>
           )}
 
           <button
