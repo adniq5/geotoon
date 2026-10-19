@@ -9,10 +9,15 @@
   "lang": "id-ID",
   "icons": [
     {
+      "src": "/images/geotoon-icon.jpeg",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
       "src": "/images/characters/pengenalan-geotoon.png",
       "sizes": "1536x1024",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ]
 }
