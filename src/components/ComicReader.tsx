@@ -36,7 +36,9 @@ export default function ComicReader({
   const [voiceFailed, setVoiceFailed] = useState(false);
   const [voiceMessage, setVoiceMessage] = useState("");
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
-  const [isCcEnabled, setIsCcEnabled] = useState(false);
+  const [isCcEnabled, setIsCcEnabled] = useState(
+    () => episodeId === "episode-01"
+  );
   const [activeCue, setActiveCue] = useState<TimedCue | null>(null);
 
   const voiceRef = useRef<HTMLAudioElement | null>(null);
@@ -401,8 +403,8 @@ export default function ComicReader({
   };
 
   useEffect(() => {
-    setIsCcEnabled(false);
-  }, [current, hasTimedCues]);
+    setIsCcEnabled(stage === "scene" && episodeId === "episode-01");
+  }, [episodeId, stage]);
 
   /*
    * =========================
