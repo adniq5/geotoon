@@ -104,7 +104,7 @@ svg.fx .p,svg.fx .a{transition:opacity .9s ease}
 <div class="bubble madan"><span class="ty"><i></i><b id="t1"></b></span></div>
 <div class="bubble marni"><span class="ty"><i></i><b id="t2"></b></span></div>
 </div>
-<div class="bar"><button id="re">Ulangi obrolan</button></div>
+
 <div class="chat" aria-live="polite">
 <div class="row m1" id="r1"><div class="av">M</div><div><div class="who">Madan</div><div class="msg" id="ct1"></div></div></div>
 <div class="row m2" id="r2"><div class="av">Ma</div><div><div class="who">Marni</div><div class="msg" id="ct2"></div></div></div>
@@ -189,6 +189,6 @@ function sub(n,id,done){if(id!==run)return;
    if(k<ws.length){var w=ws[k++];w.classList.add("show");if(w.dataset.cue)setCue(w.dataset.cue);setTimeout(s,+w.dataset.d)}
    else setTimeout(fadeOut,ci>=cs.length?3800:2200)})()}
  next()}
-document.getElementById("re").onclick=play;play();
+play();
 </script>
 </body></html>

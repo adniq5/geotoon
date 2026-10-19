@@ -89,7 +89,7 @@ svg.fx .p,svg.fx .a,svg.fx .d{transition:opacity .9s ease}
 <div class="bubble bub1"><span class="ty"><i></i><b id="t1"></b></span></div>
 <div class="bubble bub2"><span class="ty"><i></i><b id="t2"></b></span></div>
 </div>
-<div class="bar"><button id="re">Ulangi obrolan</button></div>
+
 <div class="chat" aria-live="polite">
 <div class="row m1" id="r1"><div class="av">H</div><div><div class="who">Humairoh</div><div class="msg" id="ct1"></div></div></div>
 <div class="row m2" id="r2"><div class="av">Ma</div><div><div class="who">Marni</div><div class="msg" id="ct2"></div></div></div>
@@ -179,6 +179,6 @@ function dshow(it){var c=C[it[0]],o=it[2]||{},k=3,w=c[2]*k/15.36,hh=c[3]*k/15.36
  dm.style.width=w+"cqw"}
 function showDemo(c){clearInterval(dt);if(!dm)mkDemo();var d=c&&c.d;if(!d){dm.classList.remove("on");return}
  di=0;dshow(d[0]);dm.classList.add("on");if(d.length>1)dt=setInterval(function(){di=(di+1)%d.length;dshow(d[di])},1500)}
-document.getElementById("re").onclick=play;play();
+play();
 </script>
 </body></html>

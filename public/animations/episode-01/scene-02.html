@@ -53,7 +53,7 @@ button:focus-visible{outline:3px solid #fff;outline-offset:2px}
 <div class="bub b2"><span class="ty"><i></i><b></b></span></div>
 <div class="note"><span class="ty"><i></i><b></b></span></div>
 </div>
-<div class="bar"><button id="re">Ulangi obrolan</button></div>
+
 </div>
 <script>
 var NS="http://www.w3.org/2000/svg",$=function(x){return document.getElementById(x)};
@@ -74,7 +74,7 @@ var AR=["M940 90L995 108","M940 172L985 181","M1295 200L1255 167","M1315 290L123
 AR.forEach(function(p,i){var c=mk("circle",{r:7,fill:"#fff"},$("dots"));var a=mk("animateMotion",{dur:"1.6s",begin:(i*.3)+"s",repeatCount:"indefinite",path:p},c)});
 var t0=performance.now(),run=1;
 function reset(){t0=performance.now();els.forEach(function(e){e.n=-1})}
-$("re").onclick=reset;
+
 var PS={L:[425,112],R:[1335,112]};
 var DM={earth:{c:[1000,485,320,155],w:24,pos:"L",z:"inset",t:"Permukaan bumi yang sebenarnya (citra satelit)"},
 flat:{c:[415,105,520,550],w:15,pos:"R",z:"map",t:"Digambarkan pada bidang datar menjadi peta",p:["M418 108H932V652H418Z"]},

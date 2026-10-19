@@ -54,7 +54,7 @@ button:focus-visible{outline:3px solid #fff;outline-offset:2px}
 <div class="bub" style="left:65.885%;top:59.570%;width:21.094%;height:16.406%;background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUQAAACoCAYAAACYG5eLAAAEtklEQVR4nO3c247aShRFURvl/3/Z5+Fs0oQ2xpe6usZ4TCSo7oipZQOZJ2jcsixL7TPkMs/zXPsM/PCPcTPLsizzPM93jgj7Ce4xflmFCBStEs0ffhEHiBojGimYw/ygawQOzrtjKG/3Az2JHZTXeyS7Pvw0CR+0rqdIdnNQ4YP+tR7HZg8ngHBvLcaxmQMJIIyrlThWP4QQAq9qxrHaEwshsKVGGIs+oQgCR5UMY7EnEkPgihJhzP4EQgikkjuKWR9cDIEccoUxy4MKIZBbjigmf0AxBEpKGcZHqgeaJjEEykvZnWRBFEOgllT9SRJEMQRqS9Ghy0EUQ6AVV3t0KYhiCLTmSpdOB1EMgVad7dOpIIoh0LoznTocRDEEenG0V4eCKIZAb450a3cQxRC4u6TfVAFo0d5BtyuI1iHQuz0d+xpEMQRG4ZIZGMa3gbcZROsQGImFCAxla+h9DKJ1CIzGQgSG82nwrQbROgRGZCECQ1obfr+CaB0Co7IQAcI/QbQOgZG8N89CBAiCCBAEESD8DaL7h8CIXttnIQIEQQQIgggQHtPk/iEwtmcDLUSAIIgAQRABgiACBEEECIIIEAQRIAgiQBBEgDD7lgrA/yxEgCCIAEEQAYIgAgRBBAiCCBAEESAIIkAQRIAgiABBEAGCIAIEQQQIgggQBBEgCCLANE3zPM+CCBAEESAIIkB4zPM81z4EQAssRIAgiABBEAGCIAIEQQQIgggM7/lpG0EECI9p+qkjwMgsRIAgiABBEIGhvd4yfKz9IcCILESAIIgAQRCBYb3fKnxs/SXASCxEgCCIwJDWroh/BdFlMzAqCxEgrAbRSgTu7FPjLESAIIjAULaugD8G0WUzMBoLERjGt6G3GUQrERiJhQgMYc/A+xpEKxEYxa6FKIpAz/Y2zCUzcGtHBt3uIFqJwN1ZiMBtHR1yh4JoJQK9ONOrwwtRFIG7OnXJLIpAy8426vQ9RFEEWnSlTZfeVBFFoCVXm3T5XWZRBFqQokVJPnYjikBNqRqU7HOIogjUkLI9ST+YLYpASambk/ybKqIIlJCjNVm+uieKQE65GpPtu8yiCOSQsy1ForUsy1LieYB7yz20iq04UQTOKnXFWfyyVhiBI0refqtyn08UgW9qvA9R9Y0PYQTe1XxDtol3goURaOGTKdUP8E4cYSwthPCpmYOsEUe4r5ZC+NTcgT4RR+hfixF81fThtggktK/1AL7r6rBbBBLq6y2A77o+/B5CCXn0Hr81t/uBjhJM+O2OsdtjyB/6KhGlJ6PG7Qy/qMrEdVxC1R7/IBXljKEXGxyX7T+IpR4xhHME8WbEEM4TRIAgiJXkuH9oHcI1gngTYgjXCWIFqdehGEIagtg5MYR0BLFjYghpCWJhqS6XxRDSE8QOiSHkIYgFpViHYgj5CGJHxBDyEsRCrq5DMYT8BLEDYghlCGIBV9ahGEI5gpiZGEI//tQ+AL8JIdRhIWZ0Zh2KIdQjiA0RQ6hLEDM5ug7FEOrzIszgSAyFENphIVYkhtAWL8jE9qxDIYQ2WYgJiSH0zYszkW8xFEJonxdpAlsxFELoh0vmjMQQ+uIFe9HaOhRCYFhLqH0O4Jr/AM66aYC4pjTBAAAAAElFTkSuQmCC)"><div class="tx" style="left:10.52%;top:8.67%;width:78.96%;height:66.00%"><span class="ty"><i></i><b></b></span></div></div>
 <div class="note" style="left:88.54%;top:83.7%;width:15.3cqw;height:11.8cqw"><div class="tx" style="left:3%;top:4%;width:94%;height:92%;text-align:left;justify-content:flex-start"><span class="ty"><i></i><b></b></span></div></div>
 </div>
-<div class="bar"><button id="re">Ulangi obrolan</button></div>
+
 </div>
 <script>
 var NS="http://www.w3.org/2000/svg",$=function(x){return document.getElementById(x)};
@@ -75,7 +75,7 @@ function mk(t,a,p){var e=document.createElementNS(NS,t);for(var k in a)e.setAttr
 var RP=[[440,360,"#fff"],[1238,501,"#ff5a5a"],[1122,160,"#fff"],[1272,128,"#fff"],[690,260,"#ffe27a"],[560,360,"#ffe27a"],[645,355,"#ffe27a"],[795,385,"#ffe27a"],[600,480,"#ffe27a"]],rg=RP.map(function(p){return mk("circle",{cx:p[0],cy:p[1],r:10,stroke:p[2]},$("rings"))});
 [0,1.6,3.2].forEach(function(b){var c=mk("circle",{r:8,fill:"#aef"},$("dots"));mk("animateMotion",{dur:"5s",begin:b+"s",repeatCount:"indefinite",path:"M520 130L530 220L552 290L520 360L470 440L420 510"},c)});
 var t0=performance.now();
-$("re").onclick=function(){t0=performance.now();els.forEach(function(e){e.n=-1})};
+
 var PS={L:[395,88],R:[1420,88]};
 var DM={simbol:{c:[1092,262,142,118],w:20,pos:"L",z:"legGeneral",t:"Simbol: tanda untuk sungai, batas, dan jalan",p:["M1095 300h30M1095 323h30M1095 345h30M1095 367h30"]},
 warna:{c:[1235,262,150,125],w:20,pos:"L",z:"legKec",t:"Warna: membedakan kecamatan satu dengan lainnya",p:["M1239 286h26v13h-26zM1239 305h26v13h-26zM1239 325h26v13h-26zM1239 344h26v13h-26zM1239 364h26v13h-26z"]},
