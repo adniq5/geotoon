@@ -7,17 +7,22 @@ export const metadata: Metadata = {
   description: "Media Pembelajaran Geografi Interaktif",
   icons: {
     icon: [
-      { url: "/images/geotoon-icon.jpeg", type: "image/jpeg" },
       {
-        url: "/images/characters/pengenalan-geotoon.png",
+        url: "/images/geotoon-icon-192.png",
         type: "image/png",
+        sizes: "192x192",
+      },
+      {
+        url: "/images/geotoon-icon-512.png",
+        type: "image/png",
+        sizes: "512x512",
       },
     ],
     apple: [
-      { url: "/images/geotoon-icon.jpeg", type: "image/jpeg" },
       {
-        url: "/images/characters/pengenalan-geotoon.png",
+        url: "/images/geotoon-icon-512.png",
         type: "image/png",
+        sizes: "512x512",
       },
     ],
   },
