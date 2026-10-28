@@ -11,6 +11,7 @@ export type TimedCue = {
   startSeconds: number;
   endSeconds: number;
   text: string;
+  dialogueBubbleIndex?: number;
   visual?: {
     targetId: string;
     action: "highlight" | "clear";
@@ -44,29 +45,34 @@ export type Episode = {
 export const episode1SubtitleCues: Record<string, TimedCue[]> = {
   scene1: [
     {
-      startSeconds: 1,
+      startSeconds: 0,
       endSeconds: 8.9,
       text: "Coba kalian perhatikan peta ini. Dari peta tersebut, informasi apa saja yang bisa kalian dapatkan?",
+      dialogueBubbleIndex: 0,
     },
     {
       startSeconds: 9,
       endSeconds: 13.9,
       text: "Lokasi suatu tempat, Bu.",
+      dialogueBubbleIndex: 1,
     },
     {
       startSeconds: 14,
       endSeconds: 18.9,
       text: "Kita juga bisa melihat jalan dan posisi suatu wilayah.",
+      dialogueBubbleIndex: 2,
     },
     {
       startSeconds: 19,
       endSeconds: 28.9,
       text: "Berarti kita bisa mengetahui suatu tempat meskipun belum pernah datang langsung ke sana.",
+      dialogueBubbleIndex: 3,
     },
     {
       startSeconds: 29,
       endSeconds: 30.816,
       text: "Tepat sekali.",
+      dialogueBubbleIndex: 4,
     },
   ],
   scene2: [
@@ -79,6 +85,11 @@ export const episode1SubtitleCues: Record<string, TimedCue[]> = {
       startSeconds: 5,
       endSeconds: 12.9,
       text: "Peta adalah gambaran permukaan bumi pada bidang datar yang diperkecil menggunakan skala tertentu.",
+    },
+    {
+      startSeconds: 13,
+      endSeconds: 23.719184,
+      text: "Peta membantu kita menyajikan berbagai informasi mengenai suatu wilayah dalam bentuk yang lebih sederhana dan mudah dipahami.",
     },
   ],
   scene3: [
@@ -159,16 +170,14 @@ export const episodes: Episode[] = [
         title: "Sebuah Tantangan",
         type: "html",
         html: "/animations/episode-01/scene-01.html",
-        voice: "/audio/voice-over/episode-1/scene1-episode1.mp3",
         subtitleCues: episode1SubtitleCues.scene1,
-        subtitleStatus: "ready",
+        subtitleStatus: "awaiting-timestamps",
       },
       {
         id: "scene-02",
         title: "Apa Itu Peta?",
         type: "html",
         html: "/animations/episode-01/scene-02.html",
-        voice: "/audio/voice-over/episode-1/scene2-episode1.mp3",
         subtitleCues: episode1SubtitleCues.scene2,
         subtitleStatus: "awaiting-timestamps",
       },
@@ -177,27 +186,24 @@ export const episodes: Episode[] = [
         title: "Mengenal Isi Peta",
         type: "html",
         html: "/animations/episode-01/scene-03.html",
-        voice: "/audio/voice-over/episode-1/scene3-episode1.mp3",
         subtitleCues: episode1SubtitleCues.scene3,
-        subtitleStatus: "ready",
+        subtitleStatus: "awaiting-timestamps",
       },
       {
         id: "scene-04",
         title: "Peta dalam Kehidupan",
         type: "html",
         html: "/animations/episode-01/scene-04.html",
-        voice: "/audio/voice-over/episode-1/scene4-episode1.mp3",
         subtitleCues: episode1SubtitleCues.scene4,
-        subtitleStatus: "ready",
+        subtitleStatus: "awaiting-timestamps",
       },
       {
         id: "scene-05",
         title: "Misteri Baru",
         type: "html",
         html: "/animations/episode-01/scene-05.html",
-        voice: "/audio/voice-over/episode-1/scene5-episode1.mp3",
         subtitleCues: episode1SubtitleCues.scene5,
-        subtitleStatus: "ready",
+        subtitleStatus: "awaiting-timestamps",
       },
     ],
   },
@@ -219,14 +225,14 @@ export const episodes: Episode[] = [
       },
       {
         id: "scene-02",
-        title: "Penginderaan Jauh",
+        title: "Pengindraan Jauh",
         type: "html",
         html: "/animations/episode-02/scene-02.html",
         subtitleStatus: "awaiting-voice",
       },
       {
         id: "scene-03",
-        title: "Bagaimana Satelit Mengamati Bumi",
+        title: "Bagaimana Satelit Mengamati Bumi?",
         type: "html",
         html: "/animations/episode-02/scene-03.html",
         subtitleStatus: "awaiting-voice",
@@ -261,35 +267,35 @@ export const episodes: Episode[] = [
       },
       {
         id: "scene-08",
-        title: "Rona, Warna, dan Bentuk",
+        title: "Petunjuk Pertama: Rona, Warna, dan Bentuk",
         type: "html",
         html: "/animations/episode-02/scene-08.html",
         subtitleStatus: "awaiting-voice",
       },
       {
         id: "scene-09",
-        title: "Scene 9",
+        title: "Petunjuk Kedua: Ukuran, Tekstur, dan Pola",
         type: "html",
         html: "/animations/episode-02/scene-09.html",
         subtitleStatus: "awaiting-voice",
       },
       {
         id: "scene-10",
-        title: "Scene 10",
+        title: "Petunjuk Terakhir: Bayangan, Situs, dan Asosiasi",
         type: "html",
         html: "/animations/episode-02/scene-10.html",
         subtitleStatus: "awaiting-voice",
       },
       {
         id: "scene-11",
-        title: "Scene 11",
+        title: "Tantangan Membaca Citra",
         type: "html",
         html: "/animations/episode-02/scene-11.html",
         subtitleStatus: "awaiting-voice",
       },
       {
         id: "scene-12",
-        title: "Scene 12",
+        title: "Komik Bergerak",
         type: "html",
         html: "/animations/episode-02/scene-12.html",
         subtitleStatus: "awaiting-voice",

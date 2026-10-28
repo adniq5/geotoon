@@ -1,59 +1,86 @@
 export type TeamProfile = {
   id: string;
   name: string;
-  role: string;
-  description: string;
   photo?: string;
   photoAlt?: string;
-  details?: string[];
-  placeholder?: boolean;
+  photoClass?: string;
+  role?: string;
+  details: string[];
 };
 
-export const teamProfiles: TeamProfile[] = [
+const affiliation = [
+  "Jurusan Pendidikan Geografi",
+  "Universitas Lambung Mangkurat",
+];
+
+export const lecturerProfiles: TeamProfile[] = [
   {
-    id: "faisal",
-    name: "Pak Faisal",
-    role: "Dosen terkait",
-    description: "Dosen yang tercantum sebagai pihak terkait dalam proyek GEOTOON.",
-    photo: "/images/team/faisal.jpeg",
-    photoAlt: "Foto Pak Faisal",
-    details: ["NIP: 199007292018031001"],
+    id: "nevy",
+    name: "Dr. Nevy Farista Aristin, S.Pd., M.Sc.",
+    photo: "/images/team/nevy.jpeg",
+    photoAlt: "Foto Dr. Nevy Farista Aristin",
+    photoClass: "team-profile-photo-nevy",
+    details: affiliation,
   },
   {
     id: "riyan",
-    name: "Pak Riyan",
-    role: "Dosen terkait",
-    description: "Dosen yang tercantum sebagai pihak terkait dalam proyek GEOTOON.",
-    photo: "/images/team/riyan.jpeg",
-    photoAlt: "Foto Pak Riyan",
-    details: ["NIP: 199805232025061007"],
+    name: "A. Riyan Rahman Hakiki, S.Pd., M.Pd.",
+    photo: "/images/team/riyan.png",
+    photoAlt: "Foto A. Riyan Rahman Hakiki",
+    photoClass: "team-profile-photo-riyan",
+    details: affiliation,
   },
   {
-    id: "nevy",
-    name: "Bu Nevy",
-    role: "Dosen terkait",
-    description: "Dosen yang tercantum sebagai pihak terkait dalam proyek GEOTOON.",
-    photo: "/images/team/nevy.jpeg",
-    photoAlt: "Foto Bu Nevy",
-    details: ["NIP: 198804192014042002"],
-  },
-  ...["Humairoh", "Ramadhani", "Gita", "Marni"].map((name) => ({
-    id: name.toLowerCase(),
-    name,
-    role: "Mahasiswa penyusun konten",
-    description:
-      "Berkontribusi dalam pembuatan konten, penyusunan isi, dan format materi GEOTOON.",
-    details: [
-      "Universitas Lambung Mangkurat",
-      "Program Studi Pendidikan Geografi",
-    ],
-  })),
-  {
-    id: "web-developer",
-    name: "Muhammad Adnan Iqlima",
-    role: "Pengembang Web (Web Developer)",
-    description:
-      "Bertanggung jawab atas pengembangan teknis website GEOTOON, termasuk antarmuka pengguna, implementasi animasi interaktif, serta pengembangan fitur pada platform pembelajaran digital.",
-    details: ["Politeknik Negeri Banjarmasin", "Sistem Informasi Kota Cerdas"],
+    id: "faisal",
+    name: "Dr. Faisal Arif Setiawan, M.Pd.",
+    photo: "/images/team/faisal.png",
+    photoAlt: "Foto Dr. Faisal Arif Setiawan",
+    photoClass: "team-profile-photo-faisal",
+    details: affiliation,
   },
 ];
+
+export const studentProfiles: TeamProfile[] = [
+  {
+    id: "gita",
+    name: "Gita Tria Ananda",
+    photo: "/images/team/Gita Tria Ananda.jpeg",
+    photoAlt: "Foto Gita Tria Ananda",
+    photoClass: "team-profile-photo-gita",
+    details: affiliation,
+  },
+  {
+    id: "ramadhani",
+    name: "Muhammad Ramadhani",
+    photo: "/images/team/Muhammad Ramadhani.jpeg",
+    photoAlt: "Foto Muhammad Ramadhani",
+    photoClass: "team-profile-photo-ramadhani",
+    details: affiliation,
+  },
+  {
+    id: "humairah",
+    name: "Humairah",
+    photo: "/images/team/Humairah.jpeg",
+    photoAlt: "Foto Humairah",
+    photoClass: "team-profile-photo-humairah",
+    details: affiliation,
+  },
+  {
+    id: "marni",
+    name: "Marni",
+    photo: "/images/team/Marni.jpeg",
+    photoAlt: "Foto Marni",
+    photoClass: "team-profile-photo-marni",
+    details: affiliation,
+  },
+];
+
+export const webDeveloperProfile: TeamProfile = {
+  id: "web-developer",
+  name: "Muhammad Adnan Iqlima",
+  photo: "/images/team/Adnan.jpeg",
+  photoAlt: "Foto Muhammad Adnan Iqlima",
+  photoClass: "team-profile-photo-adnan",
+  role: "Pengembang web",
+  details: ["Sistem Informasi Kota Cerdas", "Politeknik Negeri Banjarmasin"],
+};

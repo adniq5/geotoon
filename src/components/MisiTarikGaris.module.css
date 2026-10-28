@@ -1,27 +1,66 @@
 .game {
-  padding: clamp(18px, 3.2vw, 34px);
-  color: #10223d;
-  background: #fffdf7;
+  width: 100%;
+  padding: 0 clamp(9px, 2.4vw, 28px) clamp(14px, 2.5vw, 26px);
+  color: #263941;
+  background: #dcecc9;
+}
+
+.decorStrip {
+  display: grid;
+  width: min(100%, 1100px);
+  height: clamp(13px, 2vw, 20px);
+  grid-template-columns: repeat(24, minmax(0, 1fr));
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.decorTriangle {
+  background: #f2bd36;
+  clip-path: polygon(50% 100%, 0 0, 100% 0);
+}
+
+.decorTriangle:nth-child(4n + 2) {
+  background: #4487c2;
+  transform: rotate(180deg);
+}
+
+.decorTriangle:nth-child(4n + 3) {
+  background: #4b9877;
+}
+
+.decorTriangle:nth-child(4n) {
+  background: #e97865;
+  transform: rotate(180deg);
+}
+
+.panel {
+  width: min(100%, 1100px);
+  margin: 0 auto;
+  padding: clamp(18px, 3vw, 34px);
+  border: 2px solid #bdd5ae;
+  border-radius: clamp(18px, 2.6vw, 28px);
+  background: #fff;
+  box-shadow: 0 9px 24px rgba(54, 91, 54, 0.12);
 }
 
 .heading {
-  margin: 0 auto 20px;
+  margin: 0 auto clamp(15px, 2.2vw, 24px);
   text-align: center;
 }
 
 .heading h2 {
   margin: 0;
-  color: #14232a;
-  font-size: clamp(25px, 4vw, 40px);
+  color: #182a2e;
+  font-size: clamp(25px, 3.7vw, 38px);
   font-weight: 900;
-  letter-spacing: 0.025em;
-  line-height: 1.1;
+  letter-spacing: 0.015em;
+  line-height: 1.08;
 }
 
 .heading p {
-  margin: 8px 0 0;
-  color: #53616a;
-  font-size: clamp(14px, 2vw, 18px);
+  margin: 6px 0 0;
+  color: #5c6868;
+  font-size: clamp(13px, 1.65vw, 17px);
 }
 
 .instructions {
@@ -29,20 +68,24 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  max-width: 740px;
-  margin: 0 auto 18px;
-  padding: 10px 14px;
-  border-radius: 12px;
-  background: #eef6eb;
-  color: #34566a;
-  font-size: 14px;
-  line-height: 1.45;
+  max-width: 900px;
+  margin: 0 auto clamp(17px, 2.4vw, 25px);
+  color: #536764;
+  font-size: 13px;
+  line-height: 1.4;
   text-align: center;
 }
 
-.instructions span {
-  color: #1877d2;
-  font-size: 24px;
+.instructionIcon {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  place-items: center;
+  border-radius: 50%;
+  background: #edf6e6;
+  color: #39785a;
+  font-size: 17px;
   font-weight: 900;
 }
 
@@ -50,13 +93,46 @@
   margin: 0;
 }
 
+.instructionLegend {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 10px;
+  color: #687773;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.instructionLegend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.legendStart,
+.legendTarget {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #f29227;
+  box-shadow: 0 0 0 1px #df8120;
+}
+
+.legendTarget {
+  background: #1877d2;
+  box-shadow: 0 0 0 1px #1265bb;
+}
+
 .board {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: clamp(24px, 4vw, 48px);
   width: 100%;
-  max-width: 1080px;
+  max-width: 1020px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(72px, 14vw, 178px);
   margin: 0 auto;
 }
 
@@ -70,24 +146,78 @@
 
 .lines path {
   fill: none;
-  stroke-width: 3.5;
+  stroke-width: 4.5;
   stroke-linecap: round;
   vector-effect: non-scaling-stroke;
-  filter: drop-shadow(0 1px 1px rgba(16, 34, 61, 0.2));
 }
 
-.correctLine {
-  stroke: #16834b;
+.lineEndpoint {
+  fill: #f29227;
+  stroke: #fff;
+  stroke-width: 2.5;
+  vector-effect: non-scaling-stroke;
+  filter: drop-shadow(0 0 3px rgba(36, 62, 44, 0.35));
+  pointer-events: none;
 }
 
-.incorrectLine {
-  stroke: #c44c38;
-  stroke-dasharray: 8 6;
+.connectedLine {
+  stroke: #237de0;
+  stroke-width: 4.5;
+  animation: connection-draw 260ms cubic-bezier(0.2, 0.75, 0.25, 1) both;
+}
+
+.connectedLineOutline,
+.activeLineOutline {
+  stroke: #fff;
+  stroke-width: 10;
+  opacity: 0.96;
+}
+
+.connectedLineOutline {
+  animation: connection-draw 260ms cubic-bezier(0.2, 0.75, 0.25, 1) both;
+}
+
+@keyframes connection-draw {
+  from {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    opacity: 0.78;
+  }
+  to {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+.connectedEndpoint {
+  fill: #f29227;
 }
 
 .activeLine {
-  stroke: #1877d2;
-  stroke-width: 4.5 !important;
+  stroke: #1978db;
+  stroke-width: 5.5 !important;
+  filter: drop-shadow(0 0 5px rgba(24, 119, 210, 0.55));
+}
+
+.activeEndpoint {
+  fill: #1978db;
+  stroke-width: 3.5;
+  filter: drop-shadow(0 0 6px rgba(24, 119, 210, 0.64));
+}
+
+.cancelledLine {
+  stroke: #1978db;
+  stroke-width: 5.5;
+  opacity: 1;
+  animation: release-line 180ms ease-out forwards;
+}
+
+@keyframes release-line {
+  to {
+    opacity: 0;
+    stroke-width: 1;
+  }
 }
 
 .column {
@@ -96,15 +226,19 @@
   display: flex;
   min-width: 0;
   flex-direction: column;
-  gap: 12px;
+  gap: clamp(10px, 1.35vw, 14px);
 }
 
 .column h3 {
+  display: flex;
+  min-height: 25px;
+  align-items: center;
   margin: 0 0 1px;
-  color: #315f76;
-  font-size: 14px;
+  padding: 0 4px 4px;
+  color: #35647b;
+  font-size: clamp(12px, 1.45vw, 15px);
   font-weight: 900;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.035em;
 }
 
 .componentRow,
@@ -112,14 +246,16 @@
   position: relative;
   display: flex;
   min-width: 0;
-  min-height: 78px;
+  min-height: 58px;
   align-items: center;
-  border: 2px solid #b9d2ad;
-  border-radius: 15px;
-  background: rgba(248, 251, 244, 0.95);
+  border: 1.5px solid #bdd7b1;
+  border-radius: 11px;
+  background: #f7fbf2;
+  box-shadow: 0 2px 5px rgba(64, 99, 59, 0.045);
   transition:
+    transform 150ms ease,
     border-color 150ms ease,
-    background 150ms ease,
+    background-color 150ms ease,
     box-shadow 150ms ease;
 }
 
@@ -138,14 +274,15 @@
   position: relative;
   display: flex;
   width: 100%;
-  min-height: 74px;
+  min-height: 55px;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  padding: 10px 34px 10px 16px;
+  padding: 7px 34px 7px 12px;
   border: 0;
+  border-radius: inherit;
   background: transparent;
-  font-size: clamp(14px, 1.8vw, 17px);
+  font-size: clamp(13px, 1.5vw, 16px);
   font-weight: 900;
   cursor: pointer;
   touch-action: none;
@@ -154,8 +291,8 @@
 
 .functionRow {
   gap: 12px;
-  padding: 10px 14px 10px 34px;
-  font-size: clamp(13px, 1.7vw, 16px);
+  padding: 8px 12px 8px 34px;
+  font-size: clamp(12px, 1.35vw, 15px);
   line-height: 1.35;
   cursor: pointer;
 }
@@ -167,10 +304,10 @@
 .anchor {
   z-index: 3;
   display: block;
-  width: 14px;
-  height: 14px;
-  flex: 0 0 14px;
-  border: 3px solid #fff;
+  width: 13px;
+  height: 13px;
+  flex: 0 0 13px;
+  border: 2.5px solid #fff;
   border-radius: 50%;
   background: #f29227;
   box-shadow: 0 0 0 1px #e1811c;
@@ -178,16 +315,16 @@
 
 .componentButton .anchor {
   position: absolute;
-  right: 6px;
   top: 50%;
+  right: 6px;
   margin: 0;
   transform: translateY(-50%);
 }
 
 .functionRow .anchor {
   position: absolute;
-  left: 8px;
   top: 50%;
+  left: 8px;
   margin: 0;
   transform: translateY(-50%);
 }
@@ -196,39 +333,83 @@
   display: flex;
   min-width: 0;
   align-items: center;
-  gap: 10px;
+  gap: 11px;
 }
 
 .componentIcon {
   display: block;
-  width: 34px;
-  height: 34px;
-  flex: 0 0 34px;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
 }
 
 .componentRow:hover,
 .functionReady:hover {
-  border-color: #4a9bce;
-  box-shadow: 0 0 0 2px rgba(24, 119, 210, 0.12);
+  transform: translateY(-1px);
+  border-color: #84b787;
+  box-shadow: 0 5px 12px rgba(65, 110, 72, 0.12);
 }
 
 .selectedRow,
 .functionReady {
-  border-color: #1877d2;
-  background: #f0f7ff;
-  box-shadow: 0 0 0 2px rgba(24, 119, 210, 0.14);
+  border-color: #589a70;
+  background: #eef8e9;
+  box-shadow: 0 0 0 2px rgba(68, 145, 91, 0.12), 0 4px 12px rgba(65, 110, 72, 0.08);
+}
+
+.functionAssigned {
+  border-color: #98bf8e;
+  background: #f4faef;
 }
 
 .functionHovered {
-  border-color: #16834b;
-  background: #eff9ed;
-  box-shadow: 0 0 0 3px rgba(22, 131, 75, 0.2);
+  border-color: #37966b;
+  background: #eef9ee;
+  box-shadow: 0 0 0 3px rgba(22, 131, 75, 0.14), 0 5px 12px rgba(22, 131, 75, 0.08);
+}
+
+.functionHovered .anchor {
+  background: #16834b;
+  box-shadow: 0 0 0 2px #fff, 0 0 0 5px rgba(22, 131, 75, 0.3);
+}
+
+.successIndicator {
+  position: absolute;
+  z-index: 6;
+  top: 50%;
+  right: -23px;
+  display: grid;
+  width: 17px;
+  height: 17px;
+  place-items: center;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #68c75f;
+  color: #155c2d;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+  box-shadow: 0 0 0 1px rgba(42, 139, 61, 0.55);
+  pointer-events: none;
+  transform: translateY(-50%);
+  animation: success-pop 180ms ease-out both;
+}
+
+@keyframes success-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) scale(0.72);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
 }
 
 .draggingRow {
   border-color: #1877d2;
-  background: #eaf5ff;
-  box-shadow: 0 0 0 3px rgba(24, 119, 210, 0.22);
+  background: #edf6ff;
+  box-shadow: 0 0 0 3px rgba(24, 119, 210, 0.18);
 }
 
 .draggingRow .componentButton {
@@ -251,14 +432,14 @@
 
 .rowStatus {
   position: absolute;
-  right: 12px;
-  bottom: -9px;
   z-index: 4;
+  right: 9px;
+  bottom: -8px;
   padding: 1px 6px;
   border-radius: 6px;
-  background: #fffdf7;
-  color: #34566a;
-  font-size: 11px;
+  background: #fff;
+  color: #4c625b;
+  font-size: 10px;
   font-weight: 900;
   line-height: 1.3;
   pointer-events: none;
@@ -274,15 +455,15 @@
 
 .removeButton {
   position: absolute;
-  right: 9px;
-  top: 4px;
   z-index: 5;
+  top: 3px;
+  right: 5px;
   padding: 2px 6px;
-  border: 1px solid #d9cfbc;
+  border: 1px solid #cbdabc;
   border-radius: 8px;
   background: #fff;
   color: #48566b;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
   cursor: pointer;
 }
@@ -295,36 +476,89 @@
   outline-offset: 3px;
 }
 
+.summary {
+  max-width: 760px;
+  margin: clamp(14px, 2vw, 20px) auto 0;
+  padding: 8px 14px;
+  border: 1px solid #eccb70;
+  border-radius: 9px;
+  background: #fff3c5;
+  color: #795b24;
+  font-size: clamp(12px, 1.4vw, 14px);
+  font-weight: 700;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.summary strong {
+  font-weight: 900;
+}
+
 .status {
   min-height: 24px;
-  margin: 20px auto 0;
-  color: #34566a;
-  font-size: 14px;
+  margin: 16px auto 0;
+  color: #4a6258;
+  font-size: 13px;
   font-weight: 700;
   line-height: 1.5;
   text-align: center;
 }
 
+.result {
+  margin: 16px auto 0;
+  color: #3c5a4c;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.result p {
+  margin: 5px 0;
+}
+
 .resetButton {
   display: block;
   min-height: 44px;
-  margin: 12px auto 0;
-  padding: 10px 18px;
+  margin: 10px auto 0;
+  padding: 10px 20px;
   border: 0;
   border-radius: 999px;
-  background: #10223d;
-  color: white;
+  background: #28684c;
+  color: #fff;
   font-weight: 900;
   cursor: pointer;
+  transition: background-color 150ms ease, transform 150ms ease;
 }
 
-@media (max-width: 600px) {
-  .game {
-    padding: 18px 6px;
+.resetButton:hover:not(:disabled) {
+  background: #1e563e;
+  transform: translateY(-1px);
+}
+
+.resetButton:disabled {
+  background: #a8b5aa;
+  cursor: not-allowed;
+}
+
+@media (max-width: 700px) {
+  .panel {
+    padding: 18px clamp(11px, 3vw, 20px);
+  }
+
+  .instructions {
+    flex-wrap: wrap;
+    gap: 7px;
+    font-size: 12px;
+  }
+
+  .instructionLegend {
+    width: 100%;
+    justify-content: center;
   }
 
   .board {
-    gap: clamp(8px, 2.5vw, 14px);
+    gap: clamp(14px, 4vw, 30px);
   }
 
   .column {
@@ -332,114 +566,44 @@
   }
 
   .column h3 {
-    min-height: 34px;
-    display: flex;
-    align-items: end;
-    font-size: 10px;
+    min-height: 27px;
+    padding-inline: 2px;
+    font-size: clamp(10px, 2.7vw, 13px);
     letter-spacing: 0.015em;
   }
 
   .componentRow,
   .functionRow {
-    min-height: 82px;
-    border-radius: 12px;
-  }
-
-  .componentRow {
-    padding-right: 0;
+    min-height: 66px;
+    border-radius: 10px;
   }
 
   .componentButton {
-    min-height: 78px;
-    gap: 6px;
-    padding: 10px 30px 10px 10px;
-    font-size: 13px;
+    min-height: 63px;
+    gap: 4px;
+    padding: 7px 24px 7px 7px;
+    font-size: clamp(11px, 3vw, 13px);
   }
 
   .componentCopy {
-    gap: 7px;
-  }
-
-  .componentIcon {
-    width: 28px;
-    height: 28px;
-    flex-basis: 28px;
-  }
-
-  .functionRow {
-    gap: 10px;
-    padding: 10px 8px 10px 32px;
-    font-size: 12px;
-  }
-
-  .anchor {
-    width: 14px;
-    height: 14px;
-    flex-basis: 14px;
-  }
-
-  .rowStatus {
-    right: 5px;
-    bottom: -8px;
-    font-size: 10px;
-  }
-
-  .removeButton {
-    top: 3px;
-    right: 4px;
-    padding: 2px 4px;
-    font-size: 10px;
-  }
-}
-
-@media (max-width: 360px) {
-  .game {
-    padding: 16px 4px;
-  }
-
-  .board {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 10px;
-  }
-
-  .column {
-    gap: 8px;
-  }
-
-  .column h3 {
-    min-height: 30px;
-    font-size: 9px;
-    letter-spacing: 0;
-  }
-
-  .componentRow,
-  .functionRow {
-    min-height: 82px;
-  }
-
-  .componentButton {
-    min-height: 78px;
-    gap: 4px;
-    padding: 8px 24px 8px 7px;
-    font-size: 12px;
-  }
-
-  .componentCopy {
-    gap: 4px;
-  }
-
-  .componentIcon {
-    width: 24px;
-    height: 24px;
-    flex-basis: 24px;
-  }
-
-  .functionRow {
-    min-height: 82px;
     gap: 5px;
-    padding: 8px 5px 8px 26px;
-    font-size: 11px;
-    line-height: 1.2;
+  }
+
+  .componentIcon {
+    width: clamp(23px, 6vw, 31px);
+    height: clamp(23px, 6vw, 31px);
+    flex-basis: clamp(23px, 6vw, 31px);
+  }
+
+  .functionRow {
+    gap: 5px;
+    padding: 7px 5px 7px 27px;
+    font-size: clamp(10.5px, 2.7vw, 12px);
+    line-height: 1.25;
+  }
+
+  .functionRow .anchor {
+    left: 5px;
   }
 
   .anchor {
@@ -449,28 +613,74 @@
   }
 
   .componentButton .anchor {
-    right: 5px;
+    right: 4px;
   }
 
-  .functionRow .anchor {
-    left: 6px;
+  .successIndicator {
+    right: -17px;
+    width: 15px;
+    height: 15px;
+    font-size: 9px;
   }
 
   .rowStatus {
     right: 3px;
+    bottom: -7px;
     font-size: 9px;
   }
 
   .removeButton {
-    right: 3px;
-    padding: 1px 3px;
+    top: 2px;
+    right: 2px;
+    padding: 1px 4px;
     font-size: 9px;
+  }
+}
+
+@media (max-width: 360px) {
+  .panel {
+    padding-inline: 8px;
+  }
+
+  .board {
+    gap: 10px;
+  }
+
+  .column {
+    gap: 8px;
+  }
+
+  .column h3 {
+    font-size: 10px;
+  }
+
+  .componentButton {
+    padding-left: 5px;
+    font-size: 10.5px;
+  }
+
+  .componentCopy {
+    gap: 3px;
+  }
+
+  .functionRow {
+    padding-right: 3px;
+    font-size: 10px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .componentRow,
-  .functionRow {
+  .functionRow,
+  .connectedLine,
+  .activeLine,
+  .successIndicator,
+  .resetButton {
     transition: none;
+    animation: none;
+  }
+
+  .cancelledLine {
+    animation-duration: 1ms;
   }
 }

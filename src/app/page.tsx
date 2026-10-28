@@ -62,7 +62,7 @@ export default function Home() {
           banner={{
             src: "/animations/characters/intro.html",
             title: "Animasi perkenalan tokoh GEOTOON",
-            audioSrc: "/audio/introduction/perkenalan-geotoon.mp3",
+            audioSrc: "/audio/narration-normalized/introduction/perkenalan-geotoon.mp3",
             audioLabel: "voice-over perkenalan GEOTOON",
             aspectRatio: "1536 / 255",
           }}
@@ -78,7 +78,7 @@ export default function Home() {
           <HomepageAnimation
             src="/animations/characters/closing.html"
             title="Animasi Penutup Bersama GEOTOON"
-            audioSrc="/audio/introduction/penutup-perkenalan.mp3"
+            audioSrc="/audio/narration-normalized/introduction/penutup-perkenalan.mp3"
             audioLabel="voice-over penutup GEOTOON"
             aspectRatio="1536 / 189"
           />

@@ -2,16 +2,13 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import {
+  countDetectiveCompletedFields,
+  evaluateDetectiveAnswers,
+  type DetectiveNotes,
+} from "@/lib/episode3Scoring";
 
-type Notes = {
-  observations: string;
-  interpretation: string;
-  evidence: string;
-  alternative: string;
-  confidence: number;
-  verification: string;
-  changeInterpretation: string;
-};
+type Notes = DetectiveNotes;
 
 type Prompt = {
   title: string;
@@ -24,6 +21,14 @@ type Prompt = {
     label: string;
     placeholder: string;
   }[];
+};
+
+type MisiDetektifCitraProps = {
+  onComplete?: (result: {
+    completedFields: number;
+    totalFields: number;
+    scorePercent: number;
+  }) => void;
 };
 
 const prompts: Prompt[] = [
@@ -115,11 +120,23 @@ function createReport(name: string, notes: Notes) {
   ].join("\n");
 }
 
-export default function MisiDetektifCitra() {
+export default function MisiDetektifCitra({
+  onComplete,
+}: MisiDetektifCitraProps) {
   const [name, setName] = useState("");
   const [step, setStep] = useState(-1);
   const [notes, setNotes] = useState<Notes>(emptyNotes);
   const [copyMessage, setCopyMessage] = useState("");
+  const requiredFields = [
+    notes.observations,
+    notes.interpretation,
+    notes.evidence,
+    notes.alternative,
+    notes.verification,
+    notes.changeInterpretation,
+  ];
+  const completedFields = countDetectiveCompletedFields(notes);
+  const evaluation = evaluateDetectiveAnswers(notes);
 
   const updateNote = (field: keyof Notes, value: string) => {
     setNotes((previous) => ({ ...previous, [field]: value }));
@@ -171,38 +188,53 @@ export default function MisiDetektifCitra() {
   if (step === prompts.length) {
     return (
       <section className="detective-game" aria-labelledby="detective-title">
-        <span className="eyebrow">PENYELIDIKAN SELESAI</span>
-        <h2 id="detective-title">Bagus, {name.trim()}!</h2>
-        <p>
-          Kamu sudah menghubungkan pengamatan dengan bukti, mempertimbangkan
-          alternatif, dan mencatat batasan kesimpulan.
-        </p>
-        <div className="detective-report">
-          <h3>Laporan penyelidikanmu</h3>
-          <pre>{createReport(name, notes)}</pre>
+        <div className="detective-panel">
+          <span className="eyebrow">PENYELIDIKAN SELESAI</span>
+          <h2 id="detective-title">Bagus, {name.trim()}!</h2>
+          <p>
+            Kamu sudah menghubungkan pengamatan dengan bukti, mempertimbangkan
+            alternatif, dan mencatat batasan kesimpulan.
+          </p>
+          <p className="detective-status" role="status">
+            Nilai Misi Detektif: {evaluation.earned}/{evaluation.total} konsep sesuai
+            ({evaluation.scorePercent}/100).
+          </p>
+          <div className="detective-status" aria-label="Umpan balik jawaban">
+            {evaluation.feedback.map(({ title, matched, missing }) => (
+              <p key={title}>
+                <strong>{title}:</strong>{" "}
+                {matched.length ? `Sesuai: ${matched.join(", ")}.` : "Belum ada kata kunci inti yang teridentifikasi."}{" "}
+                {missing.length ? `Masih perlu: ${missing.join(", ")}.` : ""}
+              </p>
+            ))}
+          </div>
+          <div className="detective-report">
+            <h3>Laporan penyelidikanmu</h3>
+            <pre>{createReport(name, notes)}</pre>
+          </div>
+          <div className="detective-actions">
+            <button className="button primary" onClick={downloadReport}>
+              Unduh laporan
+            </button>
+            <button className="button secondary" onClick={copyReport}>
+              Salin laporan
+            </button>
+            <button
+              className="button secondary"
+              onClick={() => {
+                setNotes(emptyNotes);
+                setName("");
+                setCopyMessage("");
+                setStep(-1);
+              }}
+            >
+              Mulai lagi
+            </button>
+          </div>
+          <p className="detective-status" role="status" aria-live="polite">
+            {copyMessage}
+          </p>
         </div>
-        <div className="detective-actions">
-          <button className="button primary" onClick={downloadReport}>
-            Unduh laporan
-          </button>
-          <button className="button secondary" onClick={copyReport}>
-            Salin laporan
-          </button>
-          <button
-            className="button secondary"
-            onClick={() => {
-              setNotes(emptyNotes);
-              setName("");
-              setCopyMessage("");
-              setStep(-1);
-            }}
-          >
-            Mulai lagi
-          </button>
-        </div>
-        <p className="detective-status" role="status" aria-live="polite">
-          {copyMessage}
-        </p>
       </section>
     );
   }
@@ -211,6 +243,7 @@ export default function MisiDetektifCitra() {
 
   return (
     <section className="detective-game" aria-labelledby="detective-title">
+      <div className="detective-panel">
       <div className="detective-heading">
         <span className="eyebrow">GEOTOON</span>
         <h2 id="detective-title">Misi Detektif Citra</h2>
@@ -381,6 +414,13 @@ export default function MisiDetektifCitra() {
           disabled={!canContinue()}
           onClick={() => {
             setCopyMessage("");
+            if (step === prompts.length - 1) {
+              onComplete?.({
+                completedFields,
+                totalFields: requiredFields.length,
+                scorePercent: evaluation.scorePercent,
+              });
+            }
             setStep((current) => current + 1);
           }}
         >
@@ -396,6 +436,7 @@ export default function MisiDetektifCitra() {
         satu jawaban kunci. Jawaban disimpan hanya di perangkatmu selama sesi
         ini.
       </p>
+      </div>
     </section>
   );
 }

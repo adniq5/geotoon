@@ -3,10 +3,19 @@
 import { useEffect, useRef, useState } from "react";
 import {
   activateHomepageAudio,
+  disposeHomepageNarration,
   isHomepageAudioActive,
+  resumeHomepageNarration,
   releaseHomepageAudio,
   stopHomepageAudio,
 } from "@/lib/homepageAudio";
+import IntroductionDialog from "@/components/IntroductionDialog";
+
+export type IntroductionCue = {
+  startSeconds: number;
+  endSeconds: number;
+  text: string;
+};
 
 type HomepageAnimationProps = {
   src: string;
@@ -14,170 +23,138 @@ type HomepageAnimationProps = {
   audioSrc: string;
   audioLabel: string;
   aspectRatio: string;
-  onActivate?: () => void;
+  subtitleCues?: IntroductionCue[];
 };
-
-function watchAudio(
-  audio: HTMLAudioElement,
-  onEnded: () => void,
-  onError: () => void
-) {
-  audio.addEventListener("ended", onEnded);
-  audio.addEventListener("error", onError);
-}
 
 export default function HomepageAnimation({
   src,
   title,
   audioSrc,
-  audioLabel,
   aspectRatio,
-  onActivate,
+  subtitleCues = [],
 }: HomepageAnimationProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [message, setMessage] = useState("");
+  const [playbackHint, setPlaybackHint] = useState("");
+  const [activeCue, setActiveCue] = useState<IntroductionCue | null>(null);
 
-  useEffect(
-    () => () => {
-      if (audioRef.current) stopHomepageAudio(audioRef.current);
-    },
-    []
-  );
+  const stopAudio = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    stopHomepageAudio(audio);
+    disposeHomepageNarration(audio);
+    audio.pause();
+    audio.currentTime = 0;
+    audio.ontimeupdate = null;
+    audio.onended = null;
+    audio.onerror = null;
+    audioRef.current = null;
+    setIsPlaying(false);
+    setActiveCue(null);
+  };
 
-  const playAudio = async () => {
-    const existingAudio = audioRef.current;
-    if (existingAudio && !existingAudio.paused) {
-      existingAudio.pause();
-      stopHomepageAudio(existingAudio);
+  useEffect(() => () => stopAudio(), []);
+
+  const playAudio = async (restart = false) => {
+    let audio = audioRef.current;
+    if (restart && audio) {
+      stopAudio();
+      audio = null;
+    }
+    if (!audio) {
+      const created = new Audio(audioSrc);
+      audio = created;
+      audioRef.current = created;
+      created.ontimeupdate = () => {
+        if (audioRef.current !== created) return;
+        setActiveCue(subtitleCues.find((cue) => created.currentTime >= cue.startSeconds && created.currentTime < cue.endSeconds) ?? null);
+      };
+      created.onended = () => {
+        if (audioRef.current !== created) return;
+        releaseHomepageAudio(created);
+        created.currentTime = 0;
+        setIsPlaying(false);
+        setActiveCue(subtitleCues.at(-1) ?? null);
+      };
+      created.onerror = () => {
+        if (audioRef.current !== created) return;
+        releaseHomepageAudio(created);
+        created.ontimeupdate = null;
+        created.onended = null;
+        created.onerror = null;
+        audioRef.current = null;
+        setIsPlaying(false);
+        setPlaybackHint("Audio gagal dimuat. Ketuk gambar untuk mencoba lagi.");
+      };
+    }
+
+    const current = audioRef.current;
+    if (!current) return;
+    if (current.currentTime === 0) setActiveCue(null);
+    activateHomepageAudio(current, () => {
+      current.pause();
+      current.currentTime = 0;
       setIsPlaying(false);
-      setMessage("Suara dijeda.");
-      return;
-    }
-
-    if (audioRef.current?.error) {
-      audioRef.current = null;
-    }
-
-    if (!audioRef.current) {
-      const audio = new Audio(audioSrc);
-      watchAudio(
-        audio,
-        () => {
-          if (!isHomepageAudioActive(audio)) return;
-          audio.currentTime = 0;
-          releaseHomepageAudio(audio);
-          setIsPlaying(false);
-          setMessage(`${audioLabel} selesai.`);
-        },
-        () => {
-          if (!isHomepageAudioActive(audio)) return;
-          releaseHomepageAudio(audio);
-          setIsPlaying(false);
-          setMessage(`${audioLabel} tidak dapat diputar.`);
-        }
-      );
-      audioRef.current = audio;
-    }
-
-    const currentAudio = audioRef.current;
-    const stop = () => {
-      currentAudio.pause();
-      currentAudio.currentTime = 0;
-      setIsPlaying(false);
-      setMessage("Suara dihentikan.");
-    };
-
-    activateHomepageAudio(currentAudio, stop);
-    setMessage(`Memutar ${audioLabel.toLowerCase()}...`);
-    setIsPlaying(true);
-
+      setActiveCue(null);
+    });
     try {
-      await currentAudio.play();
+      await resumeHomepageNarration(current);
+      await current.play();
+      if (audioRef.current === current && !current.paused) {
+        setIsPlaying(true);
+        setPlaybackHint("");
+      }
     } catch {
-      if (!isHomepageAudioActive(currentAudio)) return;
-      releaseHomepageAudio(currentAudio);
+      if (audioRef.current !== current || !isHomepageAudioActive(current)) return;
+      releaseHomepageAudio(current);
       setIsPlaying(false);
-      setMessage(`${audioLabel} gagal diputar. Silakan coba lagi.`);
+      setPlaybackHint("Autoplay diblokir. Ketuk gambar untuk memulai suara.");
     }
   };
 
+  const togglePlayback = () => {
+    const audio = audioRef.current;
+    if (audio && !audio.paused) {
+      audio.pause();
+      releaseHomepageAudio(audio);
+      setIsPlaying(false);
+      return;
+    }
+    void playAudio(Boolean(audio?.ended));
+  };
+
+  const openModal = () => {
+    stopAudio();
+    setPlaybackHint("");
+    setIsOpen(true);
+    void playAudio(true);
+  };
+
+  const closeModal = () => {
+    stopAudio();
+    setPlaybackHint("");
+    setIsOpen(false);
+  };
+
   return (
-    <div
-      style={{
-        position: "relative",
-        overflow: "hidden",
-        border: "6px solid #10223d",
-        borderRadius: "24px",
-        background: "#0b1020",
-        boxShadow: "10px 11px 0 #f1c94a",
-      }}
-    >
-      <iframe
-        src={src}
+    <>
+      <div className="homepage-media-trigger">
+        <iframe src={src} title={title} sandbox="allow-scripts" loading="lazy" style={{ display: "block", width: "100%", aspectRatio, border: 0, pointerEvents: "none" }} tabIndex={-1} />
+        <button className="homepage-media-trigger-hit" type="button" onClick={openModal} aria-label={`Buka ${title}`} />
+      </div>
+      <IntroductionDialog
+        open={isOpen}
         title={title}
-        sandbox="allow-scripts"
-        loading="lazy"
-        style={{
-          display: "block",
-          width: "100%",
-          aspectRatio,
-          border: 0,
-        }}
+        imageSrc={src}
+        imageTitle={title}
+        aspectRatio={aspectRatio}
+        onImageActivate={togglePlayback}
+        isPlaying={isPlaying}
+        subtitle={activeCue?.text}
+        playbackHint={playbackHint}
+        onClose={closeModal}
       />
-      {onActivate && (
-        <button
-          className="homepage-intro-open-area"
-          type="button"
-          onClick={onActivate}
-          aria-label="Kenalan dengan tokoh GEOTOON"
-          style={{
-            position: "absolute",
-            inset: 0,
-            zIndex: 1,
-            width: "100%",
-            height: "100%",
-            padding: 0,
-            border: 0,
-            background: "transparent",
-            cursor: "pointer",
-          }}
-        />
-      )}
-      <button
-        className="button primary homepage-animation-control"
-        type="button"
-        onClick={playAudio}
-        aria-label={`${isPlaying ? "Jeda" : "Putar"} ${audioLabel}`}
-        style={{
-          position: "absolute",
-          right: "12px",
-          bottom: "12px",
-          zIndex: 2,
-          padding: "9px 14px",
-          border: "2px solid white",
-          boxShadow: "0 3px 0 #071326",
-        }}
-      >
-        <span aria-hidden="true">{isPlaying ? "Ⅱ" : "▶"}</span>
-        <span className="homepage-animation-control-label">
-          {isPlaying ? "Jeda suara" : "Putar suara"}
-        </span>
-      </button>
-      <span
-        role="status"
-        aria-live="polite"
-        style={{
-          position: "absolute",
-          width: "1px",
-          height: "1px",
-          overflow: "hidden",
-          clip: "rect(0, 0, 0, 0)",
-          whiteSpace: "nowrap",
-        }}
-      >
-        {message}
-      </span>
-    </div>
+    </>
   );
 }
