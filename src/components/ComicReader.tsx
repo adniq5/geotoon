@@ -40,6 +40,10 @@ export default function ComicReader({
     () => episodeId === "episode-01"
   );
   const [activeCue, setActiveCue] = useState<TimedCue | null>(null);
+  const [runtimeHtmlDoc, setRuntimeHtmlDoc] = useState<{
+    url: string;
+    srcDoc: string;
+  } | null>(null);
 
   const voiceRef = useRef<HTMLAudioElement | null>(null);
   const musicRef = useRef<HTMLAudioElement | null>(null);
@@ -51,6 +55,11 @@ export default function ComicReader({
   const touchStartX = useRef<number | null>(null);
 
   const scene = scenes[current];
+  const sceneHtml = scene?.type === "html" ? scene.html : null;
+  const isRevisionHtmlScene =
+    stage === "scene" &&
+    scene?.type === "html" &&
+    (episodeId === "episode-01" || episodeId === "episode-02");
   const timedCues = scene?.subtitleCues ?? scene?.timedCues;
   const hasVoice = Boolean(scene?.voice);
   const hasTimedCues = Boolean(hasVoice && timedCues?.length);
@@ -247,6 +256,123 @@ export default function ComicReader({
     },
     [current, timedCues, stopCurrentVoice]
   );
+
+  useEffect(() => {
+    if (!isRevisionHtmlScene || !sceneHtml) {
+      setRuntimeHtmlDoc(null);
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadRuntimeHtml = async () => {
+      try {
+        const response = await fetch(sceneHtml);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const source = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(source, "text/html");
+        const base = doc.createElement("base");
+        base.href = new URL(sceneHtml, window.location.href).href;
+        doc.head.prepend(base);
+
+        if (episodeId === "episode-01" && current === 4) {
+          const gainScript = doc.createElement("script");
+          gainScript.id = "geotoon-scene5-narration-gain";
+          gainScript.textContent = `
+            (function(){
+              var Context=window.AudioContext||window.webkitAudioContext;
+              if(!Context||Context.prototype.__geotoonScene5Gain)return;
+              var nativeCreateBufferSource=Context.prototype.createBufferSource;
+              Object.defineProperty(Context.prototype,"__geotoonScene5Gain",{value:true});
+              Context.prototype.createBufferSource=function(){
+                var source=nativeCreateBufferSource.call(this);
+                var gain=this.createGain();
+                var compressor=this.createDynamicsCompressor();
+                var nativeConnect=source.connect.bind(source);
+                var routed=false;
+                gain.gain.value=1.65;
+                compressor.threshold.value=-18;
+                compressor.knee.value=12;
+                compressor.ratio.value=4;
+                compressor.attack.value=0.003;
+                compressor.release.value=0.25;
+                source.connect=function(destination){
+                  if(destination===this.context.destination){
+                    if(!routed){
+                      nativeConnect(gain);
+                      gain.connect(compressor);
+                      compressor.connect(destination);
+                      routed=true;
+                    }
+                    return destination;
+                  }
+                  return nativeConnect.apply(this,arguments);
+                };
+                return source;
+              };
+            })();
+          `;
+          doc.head.appendChild(gainScript);
+        }
+
+        const hasInternalBridge =
+          doc.documentElement.innerHTML.includes("geotoon:scene-start");
+        const needsFallbackBridge =
+          episodeId === "episode-01" &&
+          (current === 1 || current === 4) &&
+          !hasInternalBridge;
+
+        if (needsFallbackBridge) {
+          const bridgeScript = doc.createElement("script");
+          bridgeScript.id = "geotoon-runtime-bridge";
+          bridgeScript.textContent = `
+            (function(){
+              var startRequested=false,started=false;
+              function startWhenReady(){
+                if(!startRequested||started)return;
+                var start=document.querySelector("#go,#ov,#big,#pl,#play");
+                if(!start||start.disabled){
+                  requestAnimationFrame(startWhenReady);
+                  return;
+                }
+                started=true;
+                start.click();
+              }
+              window.addEventListener("message",function(event){
+                if(event.source!==window.parent||!event.data)return;
+                if(event.data.type!=="geotoon:scene-start")return;
+                startRequested=true;
+                if(document.readyState==="loading"){
+                  document.addEventListener("DOMContentLoaded",startWhenReady,{once:true});
+                }else{
+                  requestAnimationFrame(startWhenReady);
+                }
+              });
+            })();
+          `;
+          doc.body.appendChild(bridgeScript);
+        }
+
+        if (!cancelled) {
+          setRuntimeHtmlDoc({
+            url: sceneHtml,
+            srcDoc: doc.documentElement.outerHTML,
+          });
+        }
+      } catch {
+        if (!cancelled) setRuntimeHtmlDoc(null);
+      }
+    };
+
+    setRuntimeHtmlDoc(null);
+    void loadRuntimeHtml();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [current, episodeId, isRevisionHtmlScene, sceneHtml]);
 
   /*
    * =========================
@@ -644,7 +770,8 @@ export default function ComicReader({
           {scene.type === "html" ? (
             <iframe
               ref={animationFrameRef}
-              src={scene.html}
+              src={runtimeHtmlDoc?.url}
+              srcDoc={runtimeHtmlDoc?.srcDoc}
               title={`Episode ${episodeNumber}: ${scene.title}`}
               className="animation-frame"
               sandbox={
@@ -652,8 +779,15 @@ export default function ComicReader({
                   ? "allow-scripts allow-same-origin"
                   : "allow-scripts"
               }
+              allow="autoplay"
               allowFullScreen
               onLoad={() => {
+                if (isRevisionHtmlScene) {
+                  animationFrameRef.current?.contentWindow?.postMessage(
+                    { type: "geotoon:scene-start" },
+                    "*"
+                  );
+                }
                 const visual = activeCueRef.current?.visual;
                 if (visual) {
                   animationFrameRef.current?.contentWindow?.postMessage(
