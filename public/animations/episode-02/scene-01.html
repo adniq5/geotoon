@@ -171,14 +171,16 @@ requestAnimationFrame(frame);
   if(src){src.onended=null;try{src.stop()}catch(e){}}
   const my=AC.createBufferSource();my.buffer=BUF;my.connect(AC.destination);src=my;ended=false;shown=[-1,-1,-1,-1];startAt=AC.currentTime;
   my.onended=()=>{if(src===my)ended=true};my.start(0);ov.style.display="none";began=true;setPaused(false);if(!looping){looping=true;loop()}}
- function play(){if(loading)return;if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume();
-  if(BUF){start();return}
-  loading=true;ov.textContent="Memuat suara...";const s=atob(document.getElementById("vo").textContent.trim()),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);
-  new Promise((r,j)=>AC.decodeAudioData(u.buffer,r,j)).then(b=>{BUF=b;loading=false;start()}).catch(()=>{loading=false;ov.textContent="Suara gagal dimuat, coba lagi"})}
+ function play(){if(loading)return;loading=true;if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)();
+  const resume=AC.state==="suspended"?AC.resume():Promise.resolve();
+  resume.then(()=>{if(AC.state!=="running"){loading=false;ov.textContent="▶ Putar dengan suara";return}
+   if(BUF){loading=false;start();return}
+   ov.textContent="Memuat suara...";const s=atob(document.getElementById("vo").textContent.trim()),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);
+   return new Promise((r,j)=>AC.decodeAudioData(u.buffer,r,j)).then(b=>{BUF=b;loading=false;start()}).catch(()=>{loading=false;ov.textContent="Suara gagal dimuat, coba lagi"})}).catch(()=>{loading=false;ov.textContent="▶ Putar dengan suara"})}
  ov.onclick=play;document.getElementById("re").onclick=play;
  window.VOp=v=>{if(!AC||!began||ended)return;if(v)AC.suspend();else AC.resume()};
  let started=false;
- function go(){if(started)return;started=true;(document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(()=>requestAnimationFrame(run))}
+ function go(){if(started)return;started=true;(document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(()=>requestAnimationFrame(()=>{run();play()}))}
  if("IntersectionObserver" in window){
   const io=new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting)){io.disconnect();go()}},{threshold:0.35});
   io.observe(document.getElementById("stage"));
