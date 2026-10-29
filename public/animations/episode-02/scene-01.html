@@ -54,7 +54,7 @@ function mk(t,a,p){const e=document.createElementNS(NS,t);for(const k in a)e.set
 const gd=document.getElementById("dialog"),gs=document.getElementById("satelit"),gr=document.getElementById("ruang");
 const sat=document.getElementById("sat");
 sat.setAttribute("x",C.sprite[0]);sat.setAttribute("y",C.sprite[1]);sat.setAttribute("width",C.sprite[2]);sat.setAttribute("height",C.sprite[3]);
-const bub=C.bubbles.map(b=>mk("rect",{x:b[0],y:b[1],width:b[2],height:b[3],rx:40,fill:"rgba(255,235,140,.10)",stroke:"#ffe27a","stroke-width":6,filter:"url(#glow)",opacity:0},gd));
+const bub=C.bubbles.map(b=>mk("rect",{x:b[0],y:b[1],width:b[2],height:b[3],rx:40,fill:"none",stroke:"none",opacity:0},gd));
 const pul=C.pulses.map(p=>mk("circle",{cx:p[0],cy:p[1],r:20,fill:p[2],filter:"url(#glow)",opacity:0},gd));
 const th=C.thumbs.map(b=>mk("rect",{x:b[0],y:b[1],width:b[2],height:b[3],rx:8,fill:"rgba(255,255,255,.14)",stroke:"#7ff0ff","stroke-width":5,filter:"url(#glow)",opacity:0},gs));
 const scans=[0,1,2].map(()=>mk("line",{stroke:"#c8ecff","stroke-width":6,"stroke-linecap":"round",filter:"url(#glow)",opacity:0},gs));
